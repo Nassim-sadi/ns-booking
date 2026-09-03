@@ -226,7 +226,8 @@
     let adminH = 0;
     if (adminBg && getComputedStyle(adminBg).display !== 'none') adminH = Math.ceil(adminBg.getBoundingClientRect().height);
     const h = maxH + adminH;
-    const val = h ? (h + 20) + 'px' : '24px';
+    // extra 20px breathing room + 12px desktop gap from CSS = ~32px total
+    const val = h ? (h + 32) + 'px' : '36px';
     document.documentElement.style.setProperty('--nsbc-header-height', val);
     const sidebar = root.querySelector('.nsbc-sidebar');
     if (sidebar) sidebar.style.top = val;
