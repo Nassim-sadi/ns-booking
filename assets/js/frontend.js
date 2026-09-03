@@ -1,0 +1,200 @@
+/* NS Booking — vanilla JS, no build */
+(function(){
+  const root = document.querySelector('[data-nsbc]');
+  if (!root || typeof NSBC === 'undefined') return;
+
+  const state = { packageId: null, session: 'solo', extras: new Set(), date: '' };
+
+  const els = {
+    packages: root.querySelector('[data-role="packages"]'),
+    extrasWrap: root.querySelector('[data-role="extras-wrap"]'),
+    extras: root.querySelector('[data-role="extras"]'),
+    summaryBody: root.querySelector('[data-role="summary-body"]'),
+    total: root.querySelector('[data-role="total"]'),
+    date: root.querySelector('[data-role="date"]'),
+    phoneCountry: root.querySelector('[data-role="phone-country"]'),
+    phone: root.querySelector('[data-role="phone"]'),
+    name: root.querySelector('[data-role="name"]'),
+    email: root.querySelector('[data-role="email"]'),
+    message: root.querySelector('[data-role="message"]'),
+    honeypot: root.querySelector('[data-role="honeypot"]'),
+    submit: root.querySelector('[data-role="submit"]'),
+    formMsg: root.querySelector('[data-role="form-msg"]'),
+    success: root.querySelector('[data-role="success"]')
+  };
+
+  const pkgs = NSBC.packages || {};
+  const extrasMap = NSBC.extras || {};
+  const currency = NSBC.currency || 'EUR';
+  const symbol = NSBC.currencySymbol || '€';
+
+  function fmt(cents){
+    const n = (cents/100).toFixed(2);
+    if (['MAD','AED','SAR'].includes(currency)) return n + ' ' + symbol;
+    return symbol + n;
+  }
+  function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function escAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+
+  function renderPackages(){
+    if (!els.packages) return;
+    const ids = Object.keys(pkgs);
+    if (!ids.length){
+      els.packages.innerHTML = '<p class="nsbc-summary-empty">No packages available.</p>';
+      return;
+    }
+    els.packages.innerHTML = ids.map(id=>{
+      const p = pkgs[id];
+      const priceFmt = p.pricesFormatted[state.session] ?? p.pricesFormatted.solo;
+      const active = String(state.packageId)===String(id) ? 'is-active' : '';
+      const img = p.imageUrl ? `<img class="nsbc-package-img" src="${escAttr(p.imageUrl)}" alt="${escAttr(p.label)}" loading="lazy">` : `<div class="nsbc-package-empty-img">📦</div>`;
+      const excerpt = p.excerpt ? `<div class="nsbc-package-excerpt">${esc(p.excerpt)}</div>` : '';
+      return `<div class="nsbc-package ${active}" data-pkg="${id}" role="button" tabindex="0" aria-pressed="${active?'true':'false'}">
+        ${img}
+        <div class="nsbc-package-body">
+          <div class="nsbc-package-title">${esc(p.label)}</div>
+          ${excerpt}
+          <div class="nsbc-package-price"><strong>${esc(priceFmt)}</strong></div>
+        </div>
+      </div>`;
+    }).join('');
+    els.packages.querySelectorAll('[data-pkg]').forEach(el=>{
+      el.addEventListener('click', ()=>{ state.packageId = parseInt(el.dataset.pkg,10); state.extras.clear(); renderPackages(); renderExtras(); renderSummary(); });
+      el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); el.click(); }});
+    });
+  }
+
+  function renderExtras(){
+    if (!els.extras || !els.extrasWrap) return;
+    if (!state.packageId || !pkgs[state.packageId]){
+      els.extrasWrap.style.display='none'; els.extras.innerHTML=''; return;
+    }
+    const p = pkgs[state.packageId];
+    const ids = p.extraIds || [];
+    if (!ids.length){ els.extrasWrap.style.display='none'; return; }
+    els.extrasWrap.style.display='';
+    els.extras.innerHTML = ids.map(id=>{
+      const ex = extrasMap[id];
+      if (!ex) return '';
+      const checked = state.extras.has(id) || state.extras.has(String(id));
+      const icon = ex.iconUrl ? `<img src="${escAttr(ex.iconUrl)}" alt="">` : (ex.iconClass ? `<span class="nsbc-extra-icon dashicons ${escAttr(ex.iconClass)}"></span>` : `<span class="nsbc-extra-icon">✨</span>`);
+      return `<label class="nsbc-extra ${checked?'is-checked':''}">
+        <input type="checkbox" value="${id}" ${checked?'checked':''}> ${icon}
+        <span>${esc(ex.label)} <small>+${esc(ex.priceFormatted)}</small></span>
+      </label>`;
+    }).join('');
+    els.extras.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const id = parseInt(cb.value,10);
+        if (cb.checked) state.extras.add(id); else state.extras.delete(id);
+        if (cb.checked) state.extras.delete(String(id)); else state.extras.delete(String(id));
+        renderExtras(); renderSummary();
+      });
+    });
+  }
+
+  function calcDisplayTotal(){
+    if (!state.packageId || !pkgs[state.packageId]) return 0;
+    const p = pkgs[state.packageId];
+    let total = p.prices[state.session] ?? p.prices.solo;
+    state.extras.forEach(id=>{ const ex = extrasMap[id] || extrasMap[String(id)]; if (ex) total += ex.price; });
+    return total;
+  }
+
+  function renderSummary(){
+    if (!els.summaryBody || !els.total) return;
+    if (!state.packageId || !pkgs[state.packageId]){
+      els.summaryBody.innerHTML = `<p class="nsbc-summary-empty">${esc(NSBC.i18n.selectPackage)}</p>`;
+      els.total.textContent = fmt(0);
+      return;
+    }
+    const p = pkgs[state.packageId];
+    const total = calcDisplayTotal();
+    const img = p.imageUrl ? `<img class="nsbc-summary-package-img" src="${escAttr(p.imageUrl)}" alt="">` : '';
+    const extrasList = Array.from(state.extras).map(id=>{
+      const ex = extrasMap[id] || extrasMap[String(id)];
+      return ex ? `<li>${esc(ex.label)} <small>+${esc(ex.priceFormatted)}</small></li>` : '';
+    }).filter(Boolean).join('');
+    els.summaryBody.innerHTML = `
+      ${img}
+      <div><strong>${esc(p.label)}</strong> — ${esc(state.session==='couple'?'Couple':'Solo')}</div>
+      <div style="margin-top:6px;font-size:13px;color:var(--nsbc-muted)">${esc(p.pricesFormatted[state.session] ?? p.pricesFormatted.solo)}</div>
+      ${extrasList ? `<ul>${extrasList}</ul>` : '<div style="color:var(--nsbc-muted);margin-top:6px;font-size:13px">No extras</div>'}
+      ${state.date ? `<div style="margin-top:10px">Date: <strong>${esc(state.date.split('-').reverse().join('/'))}</strong></div>` : '<div style="color:var(--nsbc-muted);margin-top:10px;font-size:13px">No date selected</div>'}
+    `;
+    els.total.textContent = fmt(total);
+  }
+
+  function initPhone(){
+    if (!els.phoneCountry) return;
+    let list = NSBC.phoneCountries || [];
+    // support both [{code,flag,label}] and ["+33"]
+    const normalized = list.map(c=>{
+      if (typeof c === 'string') return {code:c, label:c};
+      return c;
+    });
+    const def = NSBC.phoneDefault || (normalized[0] && normalized[0].code) || '+33';
+    els.phoneCountry.innerHTML = normalized.map(o=>{
+      const label = o.label || `${o.flag||''} ${o.code}`.trim();
+      return `<option value="${escAttr(o.code)}" ${o.code===def?'selected':''}>${esc(label)}</option>`;
+    }).join('');
+  }
+
+  const pillWrap = root.querySelector('[data-role="session-pills"]');
+  if (pillWrap){
+    pillWrap.querySelectorAll('input[name="nsbc_session"]').forEach(r=>{
+      r.addEventListener('change', ()=>{
+        state.session = r.value;
+        pillWrap.querySelectorAll('.nsbc-pill').forEach(l=>l.classList.toggle('is-active', l.contains(r)));
+        renderPackages(); renderSummary();
+      });
+    });
+  }
+  if (els.date) els.date.addEventListener('change', ()=>{ state.date = els.date.value; renderSummary(); });
+
+  async function submit(){
+    if (els.formMsg) els.formMsg.textContent='';
+    const name = els.name ? els.name.value.trim() : '';
+    const email = els.email ? els.email.value.trim() : '';
+    const phoneCountry = els.phoneCountry ? els.phoneCountry.value : '';
+    const phone = els.phone ? els.phone.value.trim() : '';
+    const date = els.date ? els.date.value : state.date;
+    const honeypot = els.honeypot ? els.honeypot.value.trim() : '';
+    if (!state.packageId) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.selectPackage; return; }
+    if (!date) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.required; return; }
+    if (name.length < 2) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.required; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.invalidEmail; return; }
+    if (!phone || phone.replace(/\D/g,'').length < 6) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.invalidPhone; return; }
+
+    const payload = { package_id: state.packageId, session_type: state.session, extras: Array.from(state.extras), date, name, email, phone_country: phoneCountry, phone, message: els.message ? els.message.value : '', website: honeypot, total: 1 };
+    if (els.submit) { els.submit.disabled=true; els.submit.textContent='…'; }
+    try{
+      let res, json;
+      try{
+        res = await fetch(NSBC.restUrl, { method:'POST', headers:{'Content-Type':'application/json','X-WP-Nonce': NSBC.restNonce}, body: JSON.stringify(payload) });
+        json = await res.json();
+      }catch(e){ res=null; }
+      if (!res || !res.ok || !json){
+        const form = new FormData();
+        form.append('action','nsbc_submit'); form.append('nonce', NSBC.ajaxNonce);
+        Object.entries(payload).forEach(([k,v])=>{ if (Array.isArray(v)) v.forEach(val=>form.append(k+'[]', val)); else form.append(k, v); });
+        res = await fetch(NSBC.ajaxUrl, {method:'POST', body: form});
+        json = await res.json();
+      }
+      if (json && (json.success || json.data)){
+        if (els.success) els.success.style.display='';
+        const layout = root.querySelector('.nsbc-layout');
+        if (layout) layout.style.display='none';
+        if (els.formMsg) { els.formMsg.className='nsbc-form-msg is-success'; els.formMsg.textContent=''; }
+      } else {
+        const msg = (json && (json.data && (json.data.message || json.data.errors || json.data))) || NSBC.i18n.submitError;
+        const text = typeof msg === 'string' ? msg : (Array.isArray(msg) ? msg.join(' ') : JSON.stringify(msg));
+        if (els.formMsg) els.formMsg.textContent = text;
+      }
+    }catch(err){ if (els.formMsg) els.formMsg.textContent = NSBC.i18n.submitError;
+    }finally{ if (els.submit){ els.submit.disabled=false; els.submit.textContent='Send Booking Request'; } }
+  }
+  if (els.submit) els.submit.addEventListener('click', submit);
+
+  initPhone(); renderPackages(); renderExtras(); renderSummary();
+})();

@@ -1,0 +1,18 @@
+# Build
+ns-booking.zip
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# Keep plugin runnable via Junction in Local — ignore nothing else
