@@ -10,6 +10,12 @@
 .nsbc-configurator input,.nsbc-configurator select,.nsbc-configurator textarea{font-size:16px}
 .nsbc-configurator *{box-sizing:border-box}
 .nsbc-layout{display:flex;flex-direction:column;gap:28px;align-items:stretch}
+.nsbc-lower{display:grid;grid-template-columns:1.35fr 460px;gap:28px;align-items:start}
+@media(max-width:980px){
+  .nsbc-lower{display:flex;flex-direction:column;gap:20px}
+  .nsbc-lower .nsbc-summary{order:1; width:100%}
+  .nsbc-lower .nsbc-step{order:2; width:100%}
+}
 .nsbc-card{background:var(--nsbc-card);border:1px solid var(--nsbc-border);border-radius:var(--nsbc-radius);padding:26px 24px;margin-bottom:22px;box-shadow:var(--nsbc-shadow)}
 .nsbc-card-title{margin:0 0 20px;font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--nsbc-text);line-height:1.2}
 .nsbc-label{font-size:15px;font-weight:700;margin-bottom:8px;display:block;color:var(--nsbc-text);text-transform:uppercase;letter-spacing:.04em}
@@ -35,9 +41,9 @@
 .nsbc-package-body{padding:14px 14px}
 .nsbc-package-title{font-weight:800;font-size:19px;margin:0 0 4px;color:var(--nsbc-text);line-height:1.3}
 .nsbc-package-excerpt{font-size:15px;color:var(--nsbc-muted);margin:0 0 10px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:58px}
-.nsbc-package-price{font-size:15px;color:var(--nsbc-muted)}
-.nsbc-package-price strong{color:var(--nsbc-text);font-size:19px}
-.nsbc-package-empty-img{aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;color:var(--nsbc-muted);font-size:28px}
+.nsbc-package-price{font-size:16px;color:var(--nsbc-muted)}
+.nsbc-package-price strong{color:var(--nsbc-text);font-size:24px;letter-spacing:-.02em}
+.nsbc-package-empty-img{aspect-ratio:16/10;display:block;background:linear-gradient(135deg,#e5e7eb 0%,#f3f4f6 100%)}
 /* pills — solo/couple split full width */
 .nsbc-pills{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .nsbc-pill{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px 16px;border:1px solid var(--nsbc-border);border-radius:14px;cursor:pointer;background:var(--nsbc-card);font-size:17px;font-weight:800;color:var(--nsbc-text);transition:background .14s,color .14s,border-color .14s}
@@ -63,14 +69,14 @@
 .nsbc-summary-body li{margin:3px 0;font-size:17px}
 .nsbc-summary-empty{color:var(--nsbc-muted);font-size:16px}
 .nsbc-summary-package-img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;margin-bottom:14px;background:var(--nsbc-border)}
-.nsbc-total{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:18px;border-top:1px solid var(--nsbc-border);font-size:clamp(30px,3.5vw,38px);font-weight:900;letter-spacing:-.03em}
-.nsbc-total strong{transition:transform .22s ease, color .22s ease; display:inline-block}
-.nsbc-total.is-updating strong{transform:scale(1.07); color:var(--nsbc-accent)}
+.nsbc-total{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:18px;border-top:1px solid var(--nsbc-border);font-size:clamp(34px,4vw,44px);font-weight:900;letter-spacing:-.03em}
+.nsbc-total strong{transition:transform .24s cubic-bezier(.34,1.56,.64,1), color .22s ease; display:inline-block}
+.nsbc-total.is-updating strong{transform:scale(1.10); color:var(--nsbc-accent)}
 .nsbc-total span{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--nsbc-muted)}
-@keyframes nsbc-price-bump{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
-.nsbc-price-bump{animation:nsbc-price-bump 320ms cubic-bezier(.34,1.56,.64,1)}
-.nsbc-package-price strong{display:inline-block; transition:transform .2s ease, color .2s ease}
-.nsbc-package-price.is-updating strong{transform:scale(1.06); color:var(--nsbc-accent)}
+@keyframes nsbc-price-bump{0%{transform:scale(1)}25%{transform:scale(1.10)}55%{transform:scale(0.98)}100%{transform:scale(1)}}
+.nsbc-price-bump{animation:nsbc-price-bump 380ms cubic-bezier(.34,1.56,.64,1)}
+.nsbc-package-price strong{display:inline-block; transition:transform .24s cubic-bezier(.34,1.56,.64,1), color .2s ease}
+.nsbc-package-price.is-updating strong{transform:scale(1.10); color:var(--nsbc-accent)}
 .nsbc-summary-hint{font-size:11.5px;color:var(--nsbc-muted);margin-top:8px;display:block}
 /* buttons */
 .nsbc-actions{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}

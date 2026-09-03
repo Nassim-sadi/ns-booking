@@ -12,6 +12,7 @@ class NSBC_Validation {
         $out['phone_default_country'] = isset($input['phone_default_country']) ? sanitize_text_field($input['phone_default_country']) : '+33';
         $out['phone_countries'] = isset($input['phone_countries']) ? sanitize_text_field($input['phone_countries']) : ($out['phone_countries'] ?? '');
         $out['enable_message'] = isset($input['enable_message']) ? (int)(bool)$input['enable_message'] : (int)($out['enable_message'] ?? 1);
+        $out['show_images'] = isset($input['show_images']) ? (int)(bool)$input['show_images'] : (int)($out['show_images'] ?? 1);
         $out['email_admin_subject'] = isset($input['email_admin_subject']) ? sanitize_text_field($input['email_admin_subject']) : ($out['email_admin_subject'] ?? '');
         $out['email_customer_subject'] = isset($input['email_customer_subject']) ? sanitize_text_field($input['email_customer_subject']) : ($out['email_customer_subject'] ?? '');
         $currencies = ['EUR','USD','GBP','MAD','TRY','AED','SAR'];

@@ -46,6 +46,7 @@ function nsbc_default_settings() {
         'email_admin_subject'=>'New booking #{{id}} — {{package}} ({{session}})',
         'email_customer_subject'=>'Your booking request received — {{package}}',
         'enable_message'=>1,
+        'show_images'=>1,
     ];
 }
 

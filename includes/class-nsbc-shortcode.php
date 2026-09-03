@@ -67,6 +67,14 @@ class NSBC_Shortcode {
             $phoneOptions[] = ['code'=>$c,'flag'=>$flag,'label'=>"$flag $c"];
         }
 
+        $showImages = !isset($settings['show_images']) || (bool)$settings['show_images'];
+        // if disabled, strip image urls server-side
+        if (!$showImages) {
+            foreach ($packagesForJs as &$pf) $pf['imageUrl'] = '';
+            foreach ($extrasForJs as &$ef) { $ef['iconUrl']=''; $ef['iconClass']=''; }
+            unset($pf,$ef);
+        }
+
         wp_enqueue_style('nsbc-frontend');
         wp_enqueue_script('nsbc-frontend');
         wp_localize_script('nsbc-frontend','NSBC',[
@@ -82,6 +90,7 @@ class NSBC_Shortcode {
             'extras'=> $extrasForJs,
             'phoneCountries'=> $phoneOptions,
             'phoneDefault'=> $defaultCountry,
+            'showImages'=> $showImages,
             'i18n'=> [
                 'selectPackage'=>__('Select a package to begin','ns-booking'),
                 'total'=>__('Total','ns-booking'),

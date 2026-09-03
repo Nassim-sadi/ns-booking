@@ -38,6 +38,7 @@
 
   function renderPackages(){
     if (!els.packages) return;
+    const showImages = NSBC.showImages !== false && NSBC.showImages !== 0 && NSBC.showImages !== '0';
     const ids = Object.keys(pkgs);
     if (!ids.length){
       els.packages.innerHTML = '<p class="nsbc-summary-empty">No packages available.</p>';
@@ -47,7 +48,11 @@
       const p = pkgs[id];
       const priceFmt = p.pricesFormatted[state.session] ?? p.pricesFormatted.solo;
       const active = String(state.packageId)===String(id) ? 'is-active' : '';
-      const img = p.imageUrl ? `<img class="nsbc-package-img" src="${escAttr(p.imageUrl)}" alt="${escAttr(p.label)}" loading="lazy">` : `<div class="nsbc-package-empty-img">📦</div>`;
+      let img = '';
+      if (showImages){
+        if (p.imageUrl) img = `<img class="nsbc-package-img" src="${escAttr(p.imageUrl)}" alt="${escAttr(p.label)}" loading="lazy">`;
+        else img = `<div class="nsbc-package-empty-img" aria-hidden="true"></div>`;
+      }
       const excerpt = p.excerpt ? `<div class="nsbc-package-excerpt">${esc(p.excerpt)}</div>` : '';
       return `<div class="nsbc-package ${active}" data-pkg="${id}" role="button" tabindex="0" aria-pressed="${active?'true':'false'}">
         ${img}
@@ -72,12 +77,18 @@
     const p = pkgs[state.packageId];
     const ids = p.extraIds || [];
     if (!ids.length){ els.extrasWrap.style.display='none'; return; }
+    const showImages = NSBC.showImages !== false && NSBC.showImages !== 0 && NSBC.showImages !== '0';
     els.extrasWrap.style.display='';
     els.extras.innerHTML = ids.map(id=>{
       const ex = extrasMap[id];
       if (!ex) return '';
       const checked = state.extras.has(id) || state.extras.has(String(id));
-      const icon = ex.iconUrl ? `<img src="${escAttr(ex.iconUrl)}" alt="">` : (ex.iconClass ? `<span class="nsbc-extra-icon dashicons ${escAttr(ex.iconClass)}"></span>` : `<span class="nsbc-extra-icon">✨</span>`);
+      let icon = '';
+      if (showImages){
+        if (ex.iconUrl) icon = `<img src="${escAttr(ex.iconUrl)}" alt="">`;
+        else if (ex.iconClass) icon = `<span class="nsbc-extra-icon dashicons ${escAttr(ex.iconClass)}"></span>`;
+        // else no icon (removed default star)
+      }
       return `<label class="nsbc-extra ${checked?'is-checked':''}">
         <input type="checkbox" value="${id}" ${checked?'checked':''}> ${icon}
         <span>${esc(ex.label)} <small>+${esc(ex.priceFormatted)}</small></span>
@@ -111,6 +122,7 @@
   }
   function renderSummary(){
     if (!els.summaryBody || !els.total) return;
+    const showImages = NSBC.showImages !== false && NSBC.showImages !== 0 && NSBC.showImages !== '0';
     if (!state.packageId || !pkgs[state.packageId]){
       // not collapsed — show detailed empty state below packages
       const ids = Object.keys(pkgs);
@@ -128,7 +140,7 @@
     const total = calcDisplayTotal();
     const changed = total !== lastTotal;
     lastTotal = total;
-    const img = p.imageUrl ? `<img class="nsbc-summary-package-img" src="${escAttr(p.imageUrl)}" alt="">` : '';
+    const img = (showImages && p.imageUrl) ? `<img class="nsbc-summary-package-img" src="${escAttr(p.imageUrl)}" alt="">` : '';
     const extrasList = Array.from(state.extras).map(id=>{
       const ex = extrasMap[id] || extrasMap[String(id)];
       return ex ? `<li>${esc(ex.label)} <small>+${esc(ex.priceFormatted)}</small></li>` : '';
@@ -143,7 +155,7 @@
     els.total.textContent = fmt(total);
     if (changed){
       const totalRow = root.querySelector('.nsbc-total');
-      if (totalRow){ totalRow.classList.remove('is-updating'); void totalRow.offsetWidth; totalRow.classList.add('is-updating'); setTimeout(()=> totalRow.classList.remove('is-updating'), 360); }
+      if (totalRow){ totalRow.classList.remove('is-updating'); void totalRow.offsetWidth; totalRow.classList.add('is-updating'); setTimeout(()=> totalRow.classList.remove('is-updating'), 420); }
       bumpPrice(els.total);
     }
   }
@@ -170,10 +182,10 @@
         const prev = state.session;
         state.session = r.value;
         pillWrap.querySelectorAll('.nsbc-pill').forEach(l=>l.classList.toggle('is-active', l.contains(r)));
-        // package prices animate
+        // package prices animate 1.1 beat
         root.querySelectorAll('.nsbc-package-price').forEach(el=>{
           el.classList.remove('is-updating'); void el.offsetWidth; el.classList.add('is-updating');
-          setTimeout(()=> el.classList.remove('is-updating'), 360);
+          setTimeout(()=> el.classList.remove('is-updating'), 420);
         });
         renderPackages(); renderSummary();
         // also bump total if changed via pill

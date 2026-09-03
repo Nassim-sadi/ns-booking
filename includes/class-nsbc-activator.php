@@ -34,6 +34,7 @@ class NSBC_Activator {
             'email_admin_subject' => 'New booking #{{id}} — {{package}} ({{session}})',
             'email_customer_subject' => 'Your booking request received — {{package}}',
             'enable_message'      => 1,
+            'show_images'         => 1,
         ];
     }
 
