@@ -47,6 +47,10 @@ function nsbc_default_settings() {
         'email_customer_subject'=>'Your booking request received — {{package}}',
         'enable_message'=>1,
         'show_images'=>1,
+        'bg_light'=>'#ffffff',
+        'bg_dark'=>'#0b0b0c',
+        'card_light'=>'#ffffff',
+        'card_dark'=>'#17171a',
     ];
 }
 

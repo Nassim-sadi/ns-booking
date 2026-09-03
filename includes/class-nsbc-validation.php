@@ -13,6 +13,15 @@ class NSBC_Validation {
         $out['phone_countries'] = isset($input['phone_countries']) ? sanitize_text_field($input['phone_countries']) : ($out['phone_countries'] ?? '');
         $out['enable_message'] = isset($input['enable_message']) ? (int)(bool)$input['enable_message'] : (int)($out['enable_message'] ?? 1);
         $out['show_images'] = isset($input['show_images']) ? (int)(bool)$input['show_images'] : (int)($out['show_images'] ?? 1);
+        // support both color picker and text helper (bg_light_text)
+        $bgL = $input['bg_light'] ?? $input['bg_light_text'] ?? null;
+        $bgD = $input['bg_dark'] ?? $input['bg_dark_text'] ?? null;
+        $cL = $input['card_light'] ?? $input['card_light_text'] ?? null;
+        $cD = $input['card_dark'] ?? $input['card_dark_text'] ?? null;
+        $out['bg_light'] = $bgL !== null ? (sanitize_hex_color($bgL) ?: '#ffffff') : ($out['bg_light'] ?? '#ffffff');
+        $out['bg_dark'] = $bgD !== null ? (sanitize_hex_color($bgD) ?: '#0b0b0c') : ($out['bg_dark'] ?? '#0b0b0c');
+        $out['card_light'] = $cL !== null ? (sanitize_hex_color($cL) ?: '#ffffff') : ($out['card_light'] ?? '#ffffff');
+        $out['card_dark'] = $cD !== null ? (sanitize_hex_color($cD) ?: '#17171a') : ($out['card_dark'] ?? '#17171a');
         $out['email_admin_subject'] = isset($input['email_admin_subject']) ? sanitize_text_field($input['email_admin_subject']) : ($out['email_admin_subject'] ?? '');
         $out['email_customer_subject'] = isset($input['email_customer_subject']) ? sanitize_text_field($input['email_customer_subject']) : ($out['email_customer_subject'] ?? '');
         $currencies = ['EUR','USD','GBP','MAD','TRY','AED','SAR'];

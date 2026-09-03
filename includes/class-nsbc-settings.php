@@ -59,6 +59,38 @@ class NSBC_Settings {
                         <label><input type="checkbox" name="nsbc_settings[show_images]" value="1" <?php checked($opt['show_images']??1,1); ?>> <?php esc_html_e('Show images (package featured image & extra icons)','ns-booking'); ?></label>
                         <p class="description"><?php esc_html_e('When disabled, cards show title + excerpt + price only, no images.','ns-booking'); ?></p>
                     </td></tr>
+                    <tr><th><?php esc_html_e('Background colors','ns-booking'); ?></th><td>
+                        <label style="display:inline-flex;align-items:center;gap:8px;margin-right:16px">
+                            Light <input type="color" name="nsbc_settings[bg_light]" value="<?php echo esc_attr($opt['bg_light']??'#ffffff'); ?>"> 
+                            <input type="text" name="nsbc_settings[bg_light_text]" value="<?php echo esc_attr($opt['bg_light']??'#ffffff'); ?>" style="width:90px" placeholder="#ffffff" oninput="this.previousElementSibling.value=this.value">
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:8px;margin-right:16px">
+                            Dark <input type="color" name="nsbc_settings[bg_dark]" value="<?php echo esc_attr($opt['bg_dark']??'#0b0b0c'); ?>">
+                            <input type="text" name="nsbc_settings[bg_dark_text]" value="<?php echo esc_attr($opt['bg_dark']??'#0b0b0c'); ?>" style="width:90px" placeholder="#0b0b0c" oninput="this.previousElementSibling.value=this.value">
+                        </label>
+                        <br><small class="description"><?php esc_html_e('Page/section background surrounding the configurator. Cards use card colors below. Leave as #ffffff / #0b0b0c to inherit site background.','ns-booking'); ?></small>
+                    </td></tr>
+                    <tr><th><?php esc_html_e('Card background','ns-booking'); ?></th><td>
+                        <label style="display:inline-flex;align-items:center;gap:8px;margin-right:16px">
+                            Light <input type="color" name="nsbc_settings[card_light]" value="<?php echo esc_attr($opt['card_light']??'#ffffff'); ?>">
+                            <input type="text" name="nsbc_settings[card_light_text]" value="<?php echo esc_attr($opt['card_light']??'#ffffff'); ?>" style="width:90px" placeholder="#ffffff" oninput="this.previousElementSibling.value=this.value">
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:8px">
+                            Dark <input type="color" name="nsbc_settings[card_dark]" value="<?php echo esc_attr($opt['card_dark']??'#17171a'); ?>">
+                            <input type="text" name="nsbc_settings[card_dark_text]" value="<?php echo esc_attr($opt['card_dark']??'#17171a'); ?>" style="width:90px" placeholder="#17171a" oninput="this.previousElementSibling.value=this.value">
+                        </label>
+                        <br><small class="description"><?php esc_html_e('Background for package cards, summary and form. Set to match or contrast your site.','ns-booking'); ?></small>
+                        <script>
+                        (function(){
+                          const pairs=[['bg_light','bg_light_text'],['bg_dark','bg_dark_text'],['card_light','card_light_text'],['card_dark','card_dark_text']];
+                          pairs.forEach(p=>{
+                            const c=document.querySelector('input[name="nsbc_settings['+p[0]+']"]');
+                            const t=document.querySelector('input[name="nsbc_settings['+p[1]+']"]');
+                            if(c&&t){ c.addEventListener('input',()=> t.value=c.value); t.addEventListener('change',()=>{ if(/^#[0-9a-fA-F]{6}$/.test(t.value)) c.value=t.value; }); }
+                          });
+                        })();
+                        </script>
+                    </td></tr>
                     <tr><th><?php esc_html_e('Admin email subject','ns-booking'); ?></th><td>
                         <input type="text" name="nsbc_settings[email_admin_subject]" value="<?php echo esc_attr($opt['email_admin_subject']??''); ?>" style="width:100%;max-width:700px">
                         <p class="description">Tags: {{id}} {{package}} {{session}} {{date}} {{total}} {{customer_name}}</p>

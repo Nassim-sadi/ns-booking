@@ -75,7 +75,19 @@ class NSBC_Shortcode {
             unset($pf,$ef);
         }
 
+        // dynamic CSS vars for bg / card colors
+        $bg_light = $settings['bg_light'] ?? '#ffffff';
+        $bg_dark = $settings['bg_dark'] ?? '#0b0b0c';
+        $card_light = $settings['card_light'] ?? '#ffffff';
+        $card_dark = $settings['card_dark'] ?? '#17171a';
+        $inlineCss = sprintf(
+            ':root{--nsbc-bg:%s;--nsbc-card:%s;}@media(prefers-color-scheme:dark){:root{--nsbc-bg:%s;--nsbc-card:%s;}} .nsbc-configurator{background:var(--nsbc-bg)}',
+            esc_attr($bg_light), esc_attr($card_light), esc_attr($bg_dark), esc_attr($card_dark)
+        );
+        wp_register_style('nsbc-frontend', NSBC_PLUGIN_URL.'assets/css/frontend.css', [], NSBC_VERSION);
         wp_enqueue_style('nsbc-frontend');
+        wp_add_inline_style('nsbc-frontend', $inlineCss);
+        wp_register_script('nsbc-frontend', NSBC_PLUGIN_URL.'assets/js/frontend.js', [], NSBC_VERSION, true);
         wp_enqueue_script('nsbc-frontend');
         wp_localize_script('nsbc-frontend','NSBC',[
             'restUrl'=> esc_url_raw(rest_url('nsbc/v1/bookings')),
