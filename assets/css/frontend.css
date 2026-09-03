@@ -68,7 +68,13 @@
 .nsbc-summary-empty{color:var(--nsbc-muted);font-size:15px}
 .nsbc-summary-package-img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;margin-bottom:14px;background:var(--nsbc-border)}
 .nsbc-total{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:18px;border-top:1px solid var(--nsbc-border);font-size:clamp(26px,3vw,32px);font-weight:900;letter-spacing:-.03em}
+.nsbc-total strong{transition:transform .22s ease, color .22s ease; display:inline-block}
+.nsbc-total.is-updating strong{transform:scale(1.07); color:var(--nsbc-accent)}
 .nsbc-total span{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--nsbc-muted)}
+@keyframes nsbc-price-bump{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
+.nsbc-price-bump{animation:nsbc-price-bump 320ms cubic-bezier(.34,1.56,.64,1)}
+.nsbc-package-price strong{display:inline-block; transition:transform .2s ease, color .2s ease}
+.nsbc-package-price.is-updating strong{transform:scale(1.06); color:var(--nsbc-accent)}
 .nsbc-summary-hint{font-size:11.5px;color:var(--nsbc-muted);margin-top:8px;display:block}
 /* buttons */
 .nsbc-actions{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}

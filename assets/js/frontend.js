@@ -101,6 +101,14 @@
     return total;
   }
 
+  let lastTotal = 0;
+  function bumpPrice(el){
+    if (!el) return;
+    el.classList.remove('nsbc-price-bump');
+    void el.offsetWidth;
+    el.classList.add('nsbc-price-bump');
+    el.addEventListener('animationend', ()=> el.classList.remove('nsbc-price-bump'), {once:true});
+  }
   function renderSummary(){
     if (!els.summaryBody || !els.total) return;
     if (!state.packageId || !pkgs[state.packageId]){
@@ -110,6 +118,8 @@
     }
     const p = pkgs[state.packageId];
     const total = calcDisplayTotal();
+    const changed = total !== lastTotal;
+    lastTotal = total;
     const img = p.imageUrl ? `<img class="nsbc-summary-package-img" src="${escAttr(p.imageUrl)}" alt="">` : '';
     const extrasList = Array.from(state.extras).map(id=>{
       const ex = extrasMap[id] || extrasMap[String(id)];
@@ -123,6 +133,11 @@
       ${state.date ? `<div style="margin-top:10px">Date: <strong>${esc(state.date.split('-').reverse().join('/'))}</strong></div>` : '<div style="color:var(--nsbc-muted);margin-top:10px;font-size:13px">No date selected</div>'}
     `;
     els.total.textContent = fmt(total);
+    if (changed){
+      const totalRow = root.querySelector('.nsbc-total');
+      if (totalRow){ totalRow.classList.remove('is-updating'); void totalRow.offsetWidth; totalRow.classList.add('is-updating'); setTimeout(()=> totalRow.classList.remove('is-updating'), 360); }
+      bumpPrice(els.total);
+    }
   }
 
   function initPhone(){
@@ -144,9 +159,20 @@
   if (pillWrap){
     pillWrap.querySelectorAll('input[name="nsbc_session"]').forEach(r=>{
       r.addEventListener('change', ()=>{
+        const prev = state.session;
         state.session = r.value;
         pillWrap.querySelectorAll('.nsbc-pill').forEach(l=>l.classList.toggle('is-active', l.contains(r)));
+        // package prices animate
+        root.querySelectorAll('.nsbc-package-price').forEach(el=>{
+          el.classList.remove('is-updating'); void el.offsetWidth; el.classList.add('is-updating');
+          setTimeout(()=> el.classList.remove('is-updating'), 360);
+        });
         renderPackages(); renderSummary();
+        // also bump total if changed via pill
+        if (prev !== state.session) {
+          const totalEl = els.total;
+          if (totalEl) bumpPrice(totalEl);
+        }
       });
     });
   }
