@@ -75,15 +75,22 @@ class NSBC_Shortcode {
             unset($pf,$ef);
         }
 
-        // dynamic CSS vars for bg / card colors
+        // dynamic CSS vars for bg / card colors + theme mode
         $bg_light = $settings['bg_light'] ?? '#ffffff';
         $bg_dark = $settings['bg_dark'] ?? '#0b0b0c';
         $card_light = $settings['card_light'] ?? '#ffffff';
         $card_dark = $settings['card_dark'] ?? '#17171a';
-        $inlineCss = sprintf(
-            ':root{--nsbc-bg:%s;--nsbc-card:%s;}@media(prefers-color-scheme:dark){:root{--nsbc-bg:%s;--nsbc-card:%s;}} .nsbc-configurator{background:var(--nsbc-bg)}',
-            esc_attr($bg_light), esc_attr($card_light), esc_attr($bg_dark), esc_attr($card_dark)
-        );
+        $theme_mode = $settings['theme_mode'] ?? 'auto';
+        if ($theme_mode === 'light') {
+            $inlineCss = sprintf(':root{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;} .nsbc-configurator{background:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_light), esc_attr($card_light), '#e5e7eb', '#111827', '#6b7280', '#111827');
+        } elseif ($theme_mode === 'dark') {
+            $inlineCss = sprintf(':root{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;} .nsbc-configurator{background:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_dark), esc_attr($card_dark), '#27272a', '#f4f4f5', '#a1a1aa', '#fafafa');
+        } else {
+            $inlineCss = sprintf(
+                ':root{--nsbc-bg:%s;--nsbc-card:%s;}@media(prefers-color-scheme:dark){:root{--nsbc-bg:%s;--nsbc-card:%s;}} .nsbc-configurator{background:var(--nsbc-bg)}',
+                esc_attr($bg_light), esc_attr($card_light), esc_attr($bg_dark), esc_attr($card_dark)
+            );
+        }
         wp_register_style('nsbc-frontend', NSBC_PLUGIN_URL.'assets/css/frontend.css', [], NSBC_VERSION);
         wp_enqueue_style('nsbc-frontend');
         wp_add_inline_style('nsbc-frontend', $inlineCss);

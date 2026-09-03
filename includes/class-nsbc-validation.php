@@ -22,6 +22,9 @@ class NSBC_Validation {
         $out['bg_dark'] = $bgD !== null ? (sanitize_hex_color($bgD) ?: '#0b0b0c') : ($out['bg_dark'] ?? '#0b0b0c');
         $out['card_light'] = $cL !== null ? (sanitize_hex_color($cL) ?: '#ffffff') : ($out['card_light'] ?? '#ffffff');
         $out['card_dark'] = $cD !== null ? (sanitize_hex_color($cD) ?: '#17171a') : ($out['card_dark'] ?? '#17171a');
+        $mode = isset($input['theme_mode']) ? strtolower(trim($input['theme_mode'])) : ($out['theme_mode'] ?? 'auto');
+        if (!in_array($mode, ['auto','light','dark'], true)) $mode = 'auto';
+        $out['theme_mode'] = $mode;
         $out['email_admin_subject'] = isset($input['email_admin_subject']) ? sanitize_text_field($input['email_admin_subject']) : ($out['email_admin_subject'] ?? '');
         $out['email_customer_subject'] = isset($input['email_customer_subject']) ? sanitize_text_field($input['email_customer_subject']) : ($out['email_customer_subject'] ?? '');
         $currencies = ['EUR','USD','GBP','MAD','TRY','AED','SAR'];

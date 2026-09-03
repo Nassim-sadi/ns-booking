@@ -59,6 +59,14 @@ class NSBC_Settings {
                         <label><input type="checkbox" name="nsbc_settings[show_images]" value="1" <?php checked($opt['show_images']??1,1); ?>> <?php esc_html_e('Show images (package featured image & extra icons)','ns-booking'); ?></label>
                         <p class="description"><?php esc_html_e('When disabled, cards show title + excerpt + price only, no images.','ns-booking'); ?></p>
                     </td></tr>
+                    <tr><th><?php esc_html_e('Theme mode','ns-booking'); ?></th><td>
+                        <select name="nsbc_settings[theme_mode]">
+                            <option value="auto" <?php selected($opt['theme_mode']??'auto','auto'); ?>><?php esc_html_e('Auto — follow system (prefers-color-scheme)','ns-booking'); ?></option>
+                            <option value="light" <?php selected($opt['theme_mode']??'auto','light'); ?>><?php esc_html_e('Light — always light','ns-booking'); ?></option>
+                            <option value="dark" <?php selected($opt['theme_mode']??'auto','dark'); ?>><?php esc_html_e('Dark — always dark','ns-booking'); ?></option>
+                        </select>
+                        <p class="description"><?php esc_html_e('Controls which background set is used. Auto follows OS preference; Light/Dark forces site style regardless of OS.','ns-booking'); ?></p>
+                    </td></tr>
                     <tr><th><?php esc_html_e('Background colors','ns-booking'); ?></th><td>
                         <label style="display:inline-flex;align-items:center;gap:8px;margin-right:16px">
                             Light <input type="color" name="nsbc_settings[bg_light]" value="<?php echo esc_attr($opt['bg_light']??'#ffffff'); ?>"> 
