@@ -198,33 +198,47 @@
 
   // sticky header auto-detect → sets --nsbc-header-height for CSS sticky offset
   function updateHeaderOffset(){
-    const sels = ['header.is-sticky','header.site-header',' .thegem-header','.thegem_header',' #site-header','.header-sticky','[data-header-sticky]','header[role="banner"]'];
-    let h = 0;
-    for (const sel of sels){
-      const el = document.querySelector(sel.trim());
-      if (!el) continue;
+    // robust: scan any fixed/sticky header near top, take max height
+    const candidates = document.querySelectorAll('header, .header, #header, [role="banner"], .site-header, nav, .thegem-te-header, .gem-header, [data-elementor-type="header"]');
+    let maxH = 0;
+    candidates.forEach(el=>{
       const cs = getComputedStyle(el);
-      if (cs.position === 'fixed' || cs.position === 'sticky'){
+      const isSticky = cs.position === 'fixed' || cs.position === 'sticky';
+      if (!isSticky) return;
+      const r = el.getBoundingClientRect();
+      // must be visible at top and wide (header, not small button)
+      if (r.width < 200) return;
+      if (r.top > 16) return;
+      if (r.height < 30 || r.height > 400) return;
+      if (r.height > maxH) maxH = Math.ceil(r.height);
+    });
+    // fallback: also scan any element with top:0 and fixed
+    if (maxH === 0){
+      document.querySelectorAll('*').forEach(el=>{
+        if (maxH) return;
+        const cs = getComputedStyle(el);
+        if (cs.position !== 'fixed') return;
         const r = el.getBoundingClientRect();
-        if (r.height > 40 && r.top <= 10){ h = Math.ceil(r.height); break; }
-      }
+        if (r.top === 0 && r.width > 300 && r.height > 40 && r.height < 300) maxH = Math.ceil(r.height);
+      });
     }
-    // admin bar
     const adminBg = document.getElementById('wpadminbar');
-    if (adminBg) {
-      const cs = getComputedStyle(adminBg);
-      if (cs.display !== 'none') h += Math.ceil(adminBg.getBoundingClientRect().height);
-    }
-    const val = h ? (h + 16) + 'px' : '24px';
+    let adminH = 0;
+    if (adminBg && getComputedStyle(adminBg).display !== 'none') adminH = Math.ceil(adminBg.getBoundingClientRect().height);
+    const h = maxH + adminH;
+    const val = h ? (h + 20) + 'px' : '24px';
     document.documentElement.style.setProperty('--nsbc-header-height', val);
     const sidebar = root.querySelector('.nsbc-sidebar');
-    if (sidebar) sidebar.style.top = `calc(var(--nsbc-header-height, 24px))`;
+    if (sidebar) sidebar.style.top = val;
+    // also expose on root for manual override: <div data-nsbc style="--nsbc-header-height:90px">
+    root.style.setProperty('--nsbc-header-height', val);
   }
   window.addEventListener('load', updateHeaderOffset);
   window.addEventListener('resize', updateHeaderOffset);
   window.addEventListener('scroll', updateHeaderOffset, {passive:true});
-  // delay for TheGem animation
-  setTimeout(updateHeaderOffset, 300); setTimeout(updateHeaderOffset, 1200);
+  const mo = new MutationObserver(updateHeaderOffset);
+  mo.observe(document.body, {attributes:true, childList:true, subtree:true});
+  setTimeout(updateHeaderOffset, 300); setTimeout(updateHeaderOffset, 900); setTimeout(updateHeaderOffset, 2000);
 
   initPhone(); renderPackages(); renderExtras(); renderSummary(); updateHeaderOffset();
 })();
