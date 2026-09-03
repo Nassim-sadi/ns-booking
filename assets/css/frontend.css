@@ -10,11 +10,16 @@
 .nsbc-configurator input,.nsbc-configurator select,.nsbc-configurator textarea{font-size:16px}
 .nsbc-configurator *{box-sizing:border-box}
 .nsbc-layout{display:flex;flex-direction:column;gap:28px;align-items:stretch}
-.nsbc-lower{display:grid;grid-template-columns:1.35fr 460px;gap:28px;align-items:start}
+.nsbc-lower{display:grid;grid-template-columns:3fr 2fr;gap:28px;align-items:start} /* 60% form / 40% summary */
 @media(max-width:980px){
   .nsbc-lower{display:flex;flex-direction:column;gap:20px}
   .nsbc-lower .nsbc-summary{order:1; width:100%}
   .nsbc-lower .nsbc-step{order:2; width:100%}
+}
+@media(max-width:640px){
+  .nsbc-grid2{grid-template-columns:1fr}
+  .nsbc-phone-row{flex-wrap:wrap}
+  .nsbc-phone-country{flex:1 1 100px; max-width:none}
 }
 .nsbc-card{background:var(--nsbc-card);border:1px solid var(--nsbc-border);border-radius:var(--nsbc-radius);padding:26px 24px;margin-bottom:22px;box-shadow:var(--nsbc-shadow)}
 .nsbc-card-title{margin:0 0 20px;font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--nsbc-text);line-height:1.2}
