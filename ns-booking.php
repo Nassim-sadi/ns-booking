@@ -45,6 +45,7 @@ function nsbc_default_settings() {
         'phone_default_country'=>'+33','phone_countries'=>['+90','+1','+44','+49','+33','+39','+34','+971'],
         'email_admin_subject'=>'New booking #{{id}} — {{package}} ({{session}})',
         'email_customer_subject'=>'Your booking request received — {{package}}',
+        'enable_message'=>1,
     ];
 }
 

@@ -112,7 +112,15 @@
   function renderSummary(){
     if (!els.summaryBody || !els.total) return;
     if (!state.packageId || !pkgs[state.packageId]){
-      els.summaryBody.innerHTML = `<p class="nsbc-summary-empty">${esc(NSBC.i18n.selectPackage)}</p>`;
+      // not collapsed — show detailed empty state below packages
+      const ids = Object.keys(pkgs);
+      const hint = ids.length ? 'Choose a package above to see details' : esc(NSBC.i18n.selectPackage);
+      els.summaryBody.innerHTML = `
+        <div class="nsbc-summary-empty" style="padding:4px 0">
+          <strong>No package selected</strong>
+          <div style="color:var(--nsbc-muted);font-size:14px;margin-top:4px">${esc(hint)}</div>
+          <div style="margin-top:10px;color:var(--nsbc-muted);font-size:13px">Date: — &nbsp; Extras: —</div>
+        </div>`;
       els.total.textContent = fmt(0);
       return;
     }
@@ -222,50 +230,5 @@
   }
   if (els.submit) els.submit.addEventListener('click', submit);
 
-  // sticky header auto-detect → sets --nsbc-header-height for CSS sticky offset
-  function updateHeaderOffset(){
-    // robust: scan any fixed/sticky header near top, take max height
-    const candidates = document.querySelectorAll('header, .header, #header, [role="banner"], .site-header, nav, .thegem-te-header, .gem-header, [data-elementor-type="header"]');
-    let maxH = 0;
-    candidates.forEach(el=>{
-      const cs = getComputedStyle(el);
-      const isSticky = cs.position === 'fixed' || cs.position === 'sticky';
-      if (!isSticky) return;
-      const r = el.getBoundingClientRect();
-      // must be visible at top and wide (header, not small button)
-      if (r.width < 200) return;
-      if (r.top > 16) return;
-      if (r.height < 30 || r.height > 400) return;
-      if (r.height > maxH) maxH = Math.ceil(r.height);
-    });
-    // fallback: also scan any element with top:0 and fixed
-    if (maxH === 0){
-      document.querySelectorAll('*').forEach(el=>{
-        if (maxH) return;
-        const cs = getComputedStyle(el);
-        if (cs.position !== 'fixed') return;
-        const r = el.getBoundingClientRect();
-        if (r.top === 0 && r.width > 300 && r.height > 40 && r.height < 300) maxH = Math.ceil(r.height);
-      });
-    }
-    const adminBg = document.getElementById('wpadminbar');
-    let adminH = 0;
-    if (adminBg && getComputedStyle(adminBg).display !== 'none') adminH = Math.ceil(adminBg.getBoundingClientRect().height);
-    const h = maxH + adminH;
-    // extra 20px breathing room + 12px desktop gap from CSS = ~32px total
-    const val = h ? (h + 32) + 'px' : '36px';
-    document.documentElement.style.setProperty('--nsbc-header-height', val);
-    const sidebar = root.querySelector('.nsbc-sidebar');
-    if (sidebar) sidebar.style.top = val;
-    // also expose on root for manual override: <div data-nsbc style="--nsbc-header-height:90px">
-    root.style.setProperty('--nsbc-header-height', val);
-  }
-  window.addEventListener('load', updateHeaderOffset);
-  window.addEventListener('resize', updateHeaderOffset);
-  window.addEventListener('scroll', updateHeaderOffset, {passive:true});
-  const mo = new MutationObserver(updateHeaderOffset);
-  mo.observe(document.body, {attributes:true, childList:true, subtree:true});
-  setTimeout(updateHeaderOffset, 300); setTimeout(updateHeaderOffset, 900); setTimeout(updateHeaderOffset, 2000);
-
-  initPhone(); renderPackages(); renderExtras(); renderSummary(); updateHeaderOffset();
+  initPhone(); renderPackages(); renderExtras(); renderSummary();
 })();

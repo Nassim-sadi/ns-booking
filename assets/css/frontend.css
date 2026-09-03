@@ -6,14 +6,9 @@
 @media(prefers-color-scheme:dark){
   :root{--nsbc-bg:#0b0b0c;--nsbc-card:#17171a;--nsbc-border:#27272a;--nsbc-text:#f4f4f5;--nsbc-muted:#a1a1aa;--nsbc-accent:#fafafa;--nsbc-shadow:0 4px 24px rgba(0,0,0,.4)}
 }
-.nsbc-configurator{font-family:inherit;max-width:1180px;margin:0 auto;box-sizing:border-box;color:var(--nsbc-text);font-size:17px;line-height:1.55}
+.nsbc-configurator{font-family:inherit;width:100%;max-width:none;margin:0;box-sizing:border-box;color:var(--nsbc-text);font-size:17px;line-height:1.55}
 .nsbc-configurator *{box-sizing:border-box}
-.nsbc-layout{display:grid;grid-template-columns:1.1fr 460px;gap:32px;align-items:start}
-@media(max-width:980px){
-  .nsbc-layout{display:flex;flex-direction:column;gap:20px}
-  .nsbc-main{order:2;width:100%}
-  .nsbc-sidebar{order:1;width:100%;position:static !important;top:auto !important}
-}
+.nsbc-layout{display:flex;flex-direction:column;gap:28px;align-items:stretch}
 .nsbc-card{background:var(--nsbc-card);border:1px solid var(--nsbc-border);border-radius:var(--nsbc-radius);padding:26px 24px;margin-bottom:22px;box-shadow:var(--nsbc-shadow)}
 .nsbc-card-title{margin:0 0 20px;font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--nsbc-text)}
 .nsbc-label{font-size:13px;font-weight:700;margin-bottom:8px;display:block;color:var(--nsbc-text);text-transform:uppercase;letter-spacing:.04em}
@@ -27,16 +22,18 @@
 .nsbc-hint{font-size:12px;color:var(--nsbc-muted)}
 .nsbc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.nsbc-grid2{grid-template-columns:1fr}}
-/* packages with images */
-.nsbc-packages{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+/* packages large — 4 per full width, 2x2 tight, excerpt below image */
+.nsbc-packages{display:grid;gap:18px;grid-template-columns:repeat(4,1fr)}
+@media(max-width:1100px){.nsbc-packages{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.nsbc-packages{grid-template-columns:1fr}}
 .nsbc-package{border:1px solid var(--nsbc-border);border-radius:14px;overflow:hidden;cursor:pointer;background:var(--nsbc-card);transition:border-color .16s,transform .12s,box-shadow .16s;display:flex;flex-direction:column}
 .nsbc-package:hover{transform:translateY(-1px);box-shadow:var(--nsbc-shadow)}
 .nsbc-package.is-active{border-color:var(--nsbc-accent);box-shadow:0 0 0 2px var(--nsbc-accent), var(--nsbc-shadow)}
 .nsbc-package-img{aspect-ratio:16/10;width:100%;object-fit:cover;background:linear-gradient(135deg,#e5e7eb 0%,#f3f4f6 100%);display:block}
 @media(prefers-color-scheme:dark){.nsbc-package-img{background:linear-gradient(135deg,#27272a 0%,#3f3f46 100%)}}
-.nsbc-package-body{padding:12px 13px}
-.nsbc-package-title{font-weight:800;font-size:16px;margin:0 0 2px;color:var(--nsbc-text);line-height:1.3}
-.nsbc-package-excerpt{font-size:13.5px;color:var(--nsbc-muted);margin:0 0 8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nsbc-package-body{padding:14px 14px}
+.nsbc-package-title{font-weight:800;font-size:17px;margin:0 0 4px;color:var(--nsbc-text);line-height:1.3}
+.nsbc-package-excerpt{font-size:14px;color:var(--nsbc-muted);margin:0 0 10px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:58px}
 .nsbc-package-price{font-size:14px;color:var(--nsbc-muted)}
 .nsbc-package-price strong{color:var(--nsbc-text);font-size:16px}
 .nsbc-package-empty-img{aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;color:var(--nsbc-muted);font-size:28px}
@@ -57,10 +54,8 @@
 .nsbc-phone-row{display:flex;gap:8px}
 .nsbc-phone-country{max-width:128px;flex:0 0 128px;font-size:14px}
 .nsbc-phone-number{flex:1}
-/* sidebar summary — larger — desktop sticky with extra gap */
-.nsbc-sidebar{position:sticky;top:calc(var(--nsbc-header-height, 24px) + 20px);align-self:start}
-@media(max-width:980px){.nsbc-sidebar{position:static}}
-.nsbc-summary{background:var(--nsbc-card);border:1px solid var(--nsbc-border);border-radius:var(--nsbc-radius);padding:22px;box-shadow:var(--nsbc-shadow)}
+/* summary stacked below packages above form — not sticky, no header offset needed */
+.nsbc-summary{width:100%;background:var(--nsbc-card);border:1px solid var(--nsbc-border);border-radius:var(--nsbc-radius);padding:24px;box-shadow:var(--nsbc-shadow)}
 .nsbc-summary-title{margin:0 0 16px;font-size:20px;font-weight:800;letter-spacing:-.015em}
 .nsbc-summary-body{font-size:16px;color:var(--nsbc-text);line-height:1.65}
 .nsbc-summary-body ul{margin:8px 0 0 18px;padding:0}

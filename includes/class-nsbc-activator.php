@@ -33,6 +33,7 @@ class NSBC_Activator {
             'phone_countries'     => ['+90','+1','+44','+49','+33','+39','+34','+31','+32','+41','+43','+48','+7','+380','+40','+30','+359','+381','+966','+971','+974','+965','+973','+968','+962','+961','+964','+98','+92','+91','+86','+81','+82','+61','+55','+52','+54'],
             'email_admin_subject' => 'New booking #{{id}} — {{package}} ({{session}})',
             'email_customer_subject' => 'Your booking request received — {{package}}',
+            'enable_message'      => 1,
         ];
     }
 

@@ -51,6 +51,10 @@ class NSBC_Settings {
                         <input type="text" name="nsbc_settings[phone_countries]" value="<?php echo esc_attr($opt['phone_countries']??''); ?>" style="width:100%;max-width:700px">
                         <p class="description"><?php esc_html_e('Country codes shown in form. e.g. +90,+1,+44,+33','ns-booking'); ?></p>
                     </td></tr>
+                    <tr><th><?php esc_html_e('Message field','ns-booking'); ?></th><td>
+                        <label><input type="checkbox" name="nsbc_settings[enable_message]" value="1" <?php checked($opt['enable_message']??1,1); ?>> <?php esc_html_e('Show message field in form','ns-booking'); ?></label>
+                        <p class="description"><?php esc_html_e('When disabled, the field is hidden and not required.','ns-booking'); ?></p>
+                    </td></tr>
                     <tr><th><?php esc_html_e('Admin email subject','ns-booking'); ?></th><td>
                         <input type="text" name="nsbc_settings[email_admin_subject]" value="<?php echo esc_attr($opt['email_admin_subject']??''); ?>" style="width:100%;max-width:700px">
                         <p class="description">Tags: {{id}} {{package}} {{session}} {{date}} {{total}} {{customer_name}}</p>
