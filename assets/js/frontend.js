@@ -196,5 +196,35 @@
   }
   if (els.submit) els.submit.addEventListener('click', submit);
 
-  initPhone(); renderPackages(); renderExtras(); renderSummary();
+  // sticky header auto-detect → sets --nsbc-header-height for CSS sticky offset
+  function updateHeaderOffset(){
+    const sels = ['header.is-sticky','header.site-header',' .thegem-header','.thegem_header',' #site-header','.header-sticky','[data-header-sticky]','header[role="banner"]'];
+    let h = 0;
+    for (const sel of sels){
+      const el = document.querySelector(sel.trim());
+      if (!el) continue;
+      const cs = getComputedStyle(el);
+      if (cs.position === 'fixed' || cs.position === 'sticky'){
+        const r = el.getBoundingClientRect();
+        if (r.height > 40 && r.top <= 10){ h = Math.ceil(r.height); break; }
+      }
+    }
+    // admin bar
+    const adminBg = document.getElementById('wpadminbar');
+    if (adminBg) {
+      const cs = getComputedStyle(adminBg);
+      if (cs.display !== 'none') h += Math.ceil(adminBg.getBoundingClientRect().height);
+    }
+    const val = h ? (h + 16) + 'px' : '24px';
+    document.documentElement.style.setProperty('--nsbc-header-height', val);
+    const sidebar = root.querySelector('.nsbc-sidebar');
+    if (sidebar) sidebar.style.top = `calc(var(--nsbc-header-height, 24px))`;
+  }
+  window.addEventListener('load', updateHeaderOffset);
+  window.addEventListener('resize', updateHeaderOffset);
+  window.addEventListener('scroll', updateHeaderOffset, {passive:true});
+  // delay for TheGem animation
+  setTimeout(updateHeaderOffset, 300); setTimeout(updateHeaderOffset, 1200);
+
+  initPhone(); renderPackages(); renderExtras(); renderSummary(); updateHeaderOffset();
 })();
