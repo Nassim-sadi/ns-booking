@@ -24,7 +24,8 @@ class NSBC_Pricing {
             if (!in_array($eid, $allowed, true)) continue; // not assigned → ignore spoof
             if (get_post_type($eid) !== NSBC_CPT_EXTRA) continue;
             $active = get_post_meta($eid, '_extra_active', true);
-            if ($active !== '' && !$active && $active !== '1') continue;
+            $isInactive = $active === '0' || $active === 0 || $active === 0.0 || $active === false;
+            if ($isInactive) continue;
             $price = (int) get_post_meta($eid, '_extra_price_cents', true);
             if ($price > 0) $total += $price;
         }

@@ -16,11 +16,13 @@ class NSBC_Shortcode {
         $currency = $settings['currency'] ?? 'EUR';
         $symbol = NSBC_Pricing::currency_symbol($currency);
         $minLead = (int)($settings['min_lead_days'] ?? 1);
-        $minDate = date('Y-m-d', strtotime('+' . $minLead . ' days'));
+        // WP timezone-aware minDate
+        $minDate = function_exists('wp_date') ? wp_date('Y-m-d', strtotime('+' . $minLead . ' days')) : date('Y-m-d', strtotime('+' . $minLead . ' days'));
         $blackout = array_filter(array_map('trim', explode(',', (string)($settings['blackout_dates'] ?? ''))));
 
-        $packages = get_posts(['post_type'=>NSBC_CPT_PACKAGE,'posts_per_page'=>-1,'post_status'=>'publish','orderby'=>'title','order'=>'ASC','meta_query'=>[['key'=>'_package_active','value'=>'1']]]);
-        $extrasAll = get_posts(['post_type'=>NSBC_CPT_EXTRA,'posts_per_page'=>-1,'post_status'=>'publish','orderby'=>'title','order'=>'ASC','meta_query'=>[['key'=>'_extra_active','value'=>'1']]]);
+        // Include packages/extras where active meta is '1' OR missing (legacy = active)
+        $packages = get_posts(['post_type'=>NSBC_CPT_PACKAGE,'posts_per_page'=>-1,'post_status'=>'publish','orderby'=>'title','order'=>'ASC','meta_query'=>[['relation'=>'OR'],['key'=>'_package_active','value'=>'1'],['key'=>'_package_active','compare'=>'NOT EXISTS']]]);
+        $extrasAll = get_posts(['post_type'=>NSBC_CPT_EXTRA,'posts_per_page'=>-1,'post_status'=>'publish','orderby'=>'title','order'=>'ASC','meta_query'=>[['relation'=>'OR'],['key'=>'_extra_active','value'=>'1'],['key'=>'_extra_active','compare'=>'NOT EXISTS']]]);
 
         // flag map — emoji best, no extra lib, tourist friendly
         $flagMap = [
@@ -75,19 +77,19 @@ class NSBC_Shortcode {
             unset($pf,$ef);
         }
 
-        // dynamic CSS vars for bg / card colors + theme mode
+        // dynamic CSS vars for bg / card colors + theme mode — scoped to .nsbc-configurator to avoid :root pollution
         $bg_light = $settings['bg_light'] ?? '#ffffff';
         $bg_dark = $settings['bg_dark'] ?? '#0b0b0c';
         $card_light = $settings['card_light'] ?? '#ffffff';
         $card_dark = $settings['card_dark'] ?? '#17171a';
         $theme_mode = $settings['theme_mode'] ?? 'auto';
         if ($theme_mode === 'light') {
-            $inlineCss = sprintf(':root{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;} .nsbc-configurator{background:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_light), esc_attr($card_light), '#e5e7eb', '#111827', '#6b7280', '#111827');
+            $inlineCss = sprintf('.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;background:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_light), esc_attr($card_light), '#e5e7eb', '#111827', '#6b7280', '#111827');
         } elseif ($theme_mode === 'dark') {
-            $inlineCss = sprintf(':root{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;} .nsbc-configurator{background:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_dark), esc_attr($card_dark), '#27272a', '#f4f4f5', '#a1a1aa', '#fafafa');
+            $inlineCss = sprintf('.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;background:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_dark), esc_attr($card_dark), '#27272a', '#f4f4f5', '#a1a1aa', '#fafafa');
         } else {
             $inlineCss = sprintf(
-                ':root{--nsbc-bg:%s;--nsbc-card:%s;}@media(prefers-color-scheme:dark){:root{--nsbc-bg:%s;--nsbc-card:%s;}} .nsbc-configurator{background:var(--nsbc-bg)}',
+                '.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;}@media(prefers-color-scheme:dark){.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;}} .nsbc-configurator{background:var(--nsbc-bg)}',
                 esc_attr($bg_light), esc_attr($card_light), esc_attr($bg_dark), esc_attr($card_dark)
             );
         }

@@ -12,17 +12,17 @@ class NSBC_Ajax {
     }
 
     public function handle_rest(WP_REST_Request $req) {
-        // Nonce via header X-WP-Nonce or _wpnonce
+        // Nonce via header X-WP-Nonce or _wpnonce — optional (public booking, honeypot is spam guard)
         $nonce = $req->get_header('X-WP-Nonce');
         if (!$nonce) $nonce = $req->get_param('_wpnonce') ?: $req->get_param('nonce');
         if ($nonce && !wp_verify_nonce($nonce,'wp_rest') && !wp_verify_nonce($nonce,'nsbc_submit')) {
             return new WP_Error('nsbc_nonce','Nonce invalid.',['status'=>403]);
         }
-        // Rate limit
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        // Rate limit — proxy-aware
+        $ip = class_exists('NSBC_Validation') && method_exists('NSBC_Validation','get_client_ip') ? NSBC_Validation::get_client_ip() : ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
         $key = 'nsbc_rate_' . md5($ip);
         $count = (int)get_transient($key);
-        if ($count > 10) return new WP_Error('nsbc_rate','Too many requests.',['status'=>429]);
+        if ($count >= 10) return new WP_Error('nsbc_rate','Too many requests.',['status'=>429]);
         set_transient($key, $count+1, 60);
 
         $body = $req->get_json_params();
@@ -35,10 +35,10 @@ class NSBC_Ajax {
         if (!wp_verify_nonce($nonce,'nsbc_submit') && !wp_verify_nonce($nonce,'wp_rest')) {
             wp_send_json_error(['message'=>__('Security check failed.','ns-booking')], 403);
         }
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $ip = class_exists('NSBC_Validation') && method_exists('NSBC_Validation','get_client_ip') ? NSBC_Validation::get_client_ip() : ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
         $key = 'nsbc_rate_' . md5($ip);
         $count=(int)get_transient($key);
-        if ($count>10) wp_send_json_error(['message'=>__('Too many requests.','ns-booking')],429);
+        if ($count>=10) wp_send_json_error(['message'=>__('Too many requests.','ns-booking')],429);
         set_transient($key,$count+1,60);
 
         $raw = $_POST;
@@ -55,6 +55,13 @@ class NSBC_Ajax {
     public function handle_recalc() {
         check_ajax_referer('nsbc_recalc','_ajax_nonce');
         if (!current_user_can('edit_posts')) wp_send_json_error('Forbidden',403);
+        // Simple rate limit for resend to avoid spamming customers
+        if (!empty($_POST['resend'])) {
+            $ip = class_exists('NSBC_Validation') && method_exists('NSBC_Validation','get_client_ip') ? NSBC_Validation::get_client_ip() : ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+            $k = 'nsbc_resend_' . md5($ip);
+            if ((int)get_transient($k) >= 3) wp_send_json_error('Too many resends — try later.', 429);
+            set_transient($k, (int)get_transient($k)+1, 300);
+        }
         if (!empty($_POST['resend'])) {
             $pid=(int)($_POST['post_id']??0);
             if ($pid) {
@@ -105,9 +112,13 @@ class NSBC_Ajax {
 
         $booking_id = wp_insert_post([
             'post_type'=>NSBC_CPT_BOOKING,
-            'post_status'=>'pending', // pending post status, meta status also pending
+            'post_status'=>'nsbc-pending', // custom status, falls back to pending if not registered
             'post_title'=> sprintf('Booking — %s — %s', $d['name'], $d['date']),
         ], true);
+        // Fallback: if nsbc-pending not yet registered (early call), WP stores as pending — fix via sync
+        if (!is_wp_error($booking_id) && get_post_status($booking_id) !== 'nsbc-pending') {
+            wp_update_post(['ID'=>$booking_id,'post_status'=>'nsbc-pending']);
+        }
         if (is_wp_error($booking_id)) return $booking_id;
 
         update_post_meta($booking_id,'_booking_package_id',$d['package_id']);
@@ -133,7 +144,7 @@ class NSBC_Ajax {
             'date'=>$d['date'],'total_cents'=>$cents,'total_formatted'=>$formatted,'currency'=>$currency,
             'customer'=>['name'=>$d['name'],'email'=>$d['email'],'phone_country'=>$d['phone_country'],'phone_number'=>$d['phone_number'],'phone_full'=>$d['phone_full'],'message'=>$d['message']],
             'created_at'=> current_time('mysql'),
-            'ip'=> $_SERVER['REMOTE_ADDR'] ?? '',
+            'ip'=> class_exists('NSBC_Validation') && method_exists('NSBC_Validation','get_client_ip') ? NSBC_Validation::get_client_ip() : ($_SERVER['REMOTE_ADDR'] ?? ''),
         ];
         update_post_meta($booking_id,'_booking_snapshot', wp_json_encode($snapshot, JSON_UNESCAPED_UNICODE));
 

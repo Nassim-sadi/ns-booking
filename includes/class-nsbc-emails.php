@@ -13,16 +13,18 @@ class NSBC_Emails {
         $phone = get_post_meta($booking_id,'_booking_phone_full',true);
         $extras = get_post_meta($booking_id,'_booking_extras_labels',true);
         if (is_array($extras)) $extras = implode(', ', $extras);
+        // Strip newlines to prevent header injection in email subjects
+        $clean = fn($v)=> str_replace(["\r","\n"], ' ', (string)$v);
         $map = [
             '{{id}}'=>$booking_id,
-            '{{package}}'=>$package,
-            '{{session}}'=>$session,
-            '{{extras}}'=>$extras,
-            '{{date}}'=>$date,
-            '{{total}}'=>$total,
-            '{{customer_name}}'=>$name,
-            '{{customer_email}}'=>$email,
-            '{{phone}}'=>$phone,
+            '{{package}}'=>$clean($package),
+            '{{session}}'=>$clean($session),
+            '{{extras}}'=>$clean($extras),
+            '{{date}}'=>$clean($date),
+            '{{total}}'=>$clean($total),
+            '{{customer_name}}'=>$clean($name),
+            '{{customer_email}}'=>$clean($email),
+            '{{phone}}'=>$clean($phone),
         ];
         return strtr((string)$text, $map);
     }

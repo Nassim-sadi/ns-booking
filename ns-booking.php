@@ -111,6 +111,18 @@ function nsbc_activate() {
     NSBC_Activator::activate();
 }
 
+function nsbc_migrate_legacy_bookings() {
+    if (get_option('nsbc_migrated_1_1')) return;
+    $q = get_posts(['post_type'=>NSBC_CPT_BOOKING,'posts_per_page'=>-1,'post_status'=>['pending'],'fields'=>'ids']);
+    foreach ($q as $bid) {
+        $meta_status = get_post_meta($bid,'_booking_status',true) ?: 'pending';
+        $desired = 'nsbc-' . (in_array($meta_status, ['pending','confirmed','cancelled','completed'], true) ? $meta_status : 'pending');
+        wp_update_post(['ID'=>$bid,'post_status'=>$desired]);
+    }
+    update_option('nsbc_migrated_1_1', 1);
+}
+add_action('init', 'nsbc_migrate_legacy_bookings', 20);
+
 function nsbc_deactivate() {
     require_once NSBC_PLUGIN_DIR . 'includes/class-nsbc-deactivator.php';
     NSBC_Deactivator::deactivate();

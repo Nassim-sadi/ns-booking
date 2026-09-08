@@ -34,7 +34,7 @@
     return symbol + n;
   }
   function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-  function escAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+  function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function renderPackages(){
     if (!els.packages) return;
@@ -97,8 +97,8 @@
     els.extras.querySelectorAll('input[type=checkbox]').forEach(cb=>{
       cb.addEventListener('change', ()=>{
         const id = parseInt(cb.value,10);
-        if (cb.checked) state.extras.add(id); else state.extras.delete(id);
-        if (cb.checked) state.extras.delete(String(id)); else state.extras.delete(String(id));
+        if (cb.checked) { state.extras.add(id); state.extras.delete(String(id)); }
+        else { state.extras.delete(id); state.extras.delete(String(id)); }
         renderExtras(); renderSummary();
       });
     });

@@ -78,7 +78,7 @@ class NSBC_Admin {
     public function filter_query($q) {
         if (!is_admin() || !$q->is_main_query()) return;
         if ($q->get('post_type') !== NSBC_CPT_BOOKING) return;
-        $meta=[];
+        $meta = $q->get('meta_query') ?: [];
         if (!empty($_GET['nsbc_pkg'])) $meta[]=['key'=>'_booking_package_id','value'=>(int)$_GET['nsbc_pkg']];
         if (!empty($_GET['nsbc_status'])) $meta[]=['key'=>'_booking_status','value'=>sanitize_key($_GET['nsbc_status'])];
         if (!empty($_GET['nsbc_session'])) $meta[]=['key'=>'_booking_session_type','value'=>sanitize_key($_GET['nsbc_session'])];

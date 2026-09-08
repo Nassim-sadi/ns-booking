@@ -112,6 +112,9 @@ class NSBC_Metabox_Booking {
         update_post_meta($post_id,'_booking_customer_email',$email);
         update_post_meta($post_id,'_booking_phone_full',$phone);
         update_post_meta($post_id,'_booking_customer_message',$msg);
+        // normalize + sync status to both meta and post_status (wp custom status)
+        $allowed_statuses = ['pending','confirmed','cancelled','completed'];
+        if (!in_array($status, $allowed_statuses, true)) $status = 'pending';
         update_post_meta($post_id,'_booking_status',$status);
         // recalc total server-side
         if ($pkg) {
@@ -121,10 +124,18 @@ class NSBC_Metabox_Booking {
             update_post_meta($post_id,'_booking_total_cents',$cents);
             update_post_meta($post_id,'_booking_total_formatted',NSBC_Pricing::format($cents,$curr));
         }
-        // sync post title
+        // sync post title + post_status (avoid infinite loop)
         $title = sprintf('Booking #%d — %s — %s', $post_id, $name ?: '—', $date ?: '—');
-        if ($post->post_title !== $title) {
-            wp_update_post(['ID'=>$post_id,'post_title'=>$title]);
+        $desired_status = 'nsbc-' . $status;
+        $needs_update = false;
+        $update = ['ID'=>$post_id];
+        if ($post->post_title !== $title) { $update['post_title']=$title; $needs_update=true; }
+        if ($post->post_status !== $desired_status) { $update['post_status']=$desired_status; $needs_update=true; }
+        if ($needs_update) {
+            // prevent recursion: temporarily remove our own save hook
+            remove_action('save_post_' . NSBC_CPT_BOOKING, [$this,'save'], 10);
+            wp_update_post($update);
+            add_action('save_post_' . NSBC_CPT_BOOKING, [$this,'save'], 10, 2);
         }
     }
 }
