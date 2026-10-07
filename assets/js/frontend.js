@@ -53,7 +53,7 @@
         if (p.imageUrl) img = `<img class="nsbc-package-img" src="${escAttr(p.imageUrl)}" alt="${escAttr(p.label)}" loading="lazy">`;
         else img = `<div class="nsbc-package-empty-img" aria-hidden="true"></div>`;
       }
-      const excerpt = p.excerpt ? `<div class="nsbc-package-excerpt">${esc(p.excerpt)}</div>` : '';
+      const excerpt = `<div class="nsbc-package-excerpt">${p.excerpt ? esc(p.excerpt) : ''}</div>`;
       return `<div class="nsbc-package ${active}" data-pkg="${id}" role="button" tabindex="0" aria-pressed="${active?'true':'false'}">
         ${img}
         <div class="nsbc-package-body">
@@ -113,6 +113,9 @@
   }
 
   let lastTotal = 0;
+  let lastSummaryPkgId = null;
+  let summaryFadeTimer = null;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function bumpPrice(el){
     if (!el) return;
     el.classList.remove('nsbc-price-bump');
@@ -124,7 +127,9 @@
     if (!els.summaryBody || !els.total) return;
     const showImages = NSBC.showImages !== false && NSBC.showImages !== 0 && NSBC.showImages !== '0';
     if (!state.packageId || !pkgs[state.packageId]){
-      // not collapsed — show detailed empty state below packages
+      // not collapsed - show detailed empty state below packages
+      if (summaryFadeTimer){ clearTimeout(summaryFadeTimer); summaryFadeTimer = null; }
+      lastSummaryPkgId = null;
       const ids = Object.keys(pkgs);
       const hint = ids.length ? 'Choose a package above to see details' : esc(NSBC.i18n.selectPackage);
       els.summaryBody.innerHTML = `
@@ -140,18 +145,38 @@
     const total = calcDisplayTotal();
     const changed = total !== lastTotal;
     lastTotal = total;
-    const img = (showImages && p.imageUrl) ? `<img class="nsbc-summary-package-img" src="${escAttr(p.imageUrl)}" alt="">` : '';
+    const pkgChanged = String(lastSummaryPkgId) !== String(state.packageId);
+    lastSummaryPkgId = state.packageId;
+    const newImgSrc = (showImages && p.imageUrl) ? p.imageUrl : '';
+    const img = newImgSrc ? `<img class="nsbc-summary-package-img" src="${escAttr(newImgSrc)}" alt="">` : '';
     const extrasList = Array.from(state.extras).map(id=>{
       const ex = extrasMap[id] || extrasMap[String(id)];
       return ex ? `<li>${esc(ex.label)} <small>+${esc(ex.priceFormatted)}</small></li>` : '';
     }).filter(Boolean).join('');
-    els.summaryBody.innerHTML = `
+    const bodyHtml = `
       ${img}
-      <div><strong>${esc(p.label)}</strong> — ${esc(state.session==='couple'?'Couple':'Solo')}</div>
+      <div><strong>${esc(p.label)}</strong> - ${esc(state.session==='couple'?'Couple':'Solo')}</div>
       <div style="margin-top:6px;font-size:13px;color:var(--nsbc-muted)">${esc(p.pricesFormatted[state.session] ?? p.pricesFormatted.solo)}</div>
       ${extrasList ? `<ul>${extrasList}</ul>` : '<div style="color:var(--nsbc-muted);margin-top:6px;font-size:13px">No extras</div>'}
       ${state.date ? `<div style="margin-top:10px">Date: <strong>${esc(state.date.split('-').reverse().join('/'))}</strong></div>` : '<div style="color:var(--nsbc-muted);margin-top:10px;font-size:13px">No date selected</div>'}
     `;
+    const swapBody = (animateIn)=>{
+      els.summaryBody.innerHTML = bodyHtml;
+      const newImg = els.summaryBody.querySelector('.nsbc-summary-package-img');
+      if (newImg && animateIn){
+        newImg.classList.add('nsbc-img-fade-in');
+        newImg.addEventListener('animationend', ()=> newImg.classList.remove('nsbc-img-fade-in'), {once:true});
+      }
+    };
+    if (summaryFadeTimer){ clearTimeout(summaryFadeTimer); summaryFadeTimer = null; }
+    const prevImg = els.summaryBody.querySelector('.nsbc-summary-package-img');
+    if (!reduceMotion && pkgChanged && prevImg && prevImg.getAttribute('src') !== newImgSrc){
+      // fade old package image out, then swap summary and fade new image in
+      prevImg.classList.add('nsbc-img-fade-out');
+      summaryFadeTimer = setTimeout(()=>{ summaryFadeTimer = null; swapBody(!!newImgSrc); }, 200);
+    } else {
+      swapBody(pkgChanged && !prevImg && !!newImgSrc && !reduceMotion);
+    }
     els.total.textContent = fmt(total);
     if (changed){
       const totalRow = root.querySelector('.nsbc-total');

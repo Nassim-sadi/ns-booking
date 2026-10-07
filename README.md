@@ -189,6 +189,11 @@ templates/emails/*.php
 
 ## Changelog
 
+### 1.1.3
+- **Fix:** uniform card spacing — removed `.nsbc-card` margin that double-counted with layout gaps (50px vs 28px between sections); cards now use a single flex gap so top/bottom/internal spacing is identical
+- **Fix:** package cards align — excerpt slot always reserved, price pinned to card bottom, so all cards in a row match height and title/price positions
+- **Feat:** summary package image fades out/in when selecting a different package (respects `prefers-reduced-motion`)
+
 ### 1.1.2
 - **Revert:** removed default/automatic extras images from 1.1.1 — extras stay imageless and render as plain text checkboxes in the form; the manual icon fields in the extra edit screen still exist if ever needed
 
