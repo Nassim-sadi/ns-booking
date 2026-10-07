@@ -5,10 +5,10 @@ class NSBC_CPT {
     public function register() {
         // Booking statuses
         $statuses = [
-            'nsbc-pending'   => ['label'=> _x('Pending','booking status','ns-booking'), 'public'=>false, 'show_in_admin_all_list'=>true],
-            'nsbc-confirmed' => ['label'=> _x('Confirmed','booking status','ns-booking'), 'public'=>false, 'show_in_admin_all_list'=>true],
-            'nsbc-cancelled' => ['label'=> _x('Cancelled','booking status','ns-booking'), 'public'=>false, 'show_in_admin_all_list'=>true],
-            'nsbc-completed' => ['label'=> _x('Completed','booking status','ns-booking'), 'public'=>false, 'show_in_admin_all_list'=>true],
+            'nsbc-pending'   => ['label'=> _x('Pending','booking status','ns-booking'), 'public'=>false, 'protected'=>true, 'show_in_admin_all_list'=>true],
+            'nsbc-confirmed' => ['label'=> _x('Confirmed','booking status','ns-booking'), 'public'=>false, 'protected'=>true, 'show_in_admin_all_list'=>true],
+            'nsbc-cancelled' => ['label'=> _x('Cancelled','booking status','ns-booking'), 'public'=>false, 'protected'=>true, 'show_in_admin_all_list'=>true],
+            'nsbc-completed' => ['label'=> _x('Completed','booking status','ns-booking'), 'public'=>false, 'protected'=>true, 'show_in_admin_all_list'=>true],
         ];
         foreach ($statuses as $name=>$args) {
             register_post_status($name, array_merge([

@@ -189,6 +189,10 @@ templates/emails/*.php
 
 ## Changelog
 
+### 1.1.6
+- **Fix:** success message never appeared after a booking — it sat inside the form layout that gets hidden on submit; moved out so it stays visible (now also scrolled into view)
+- **Fix:** bookings hidden from the admin "All" list — custom statuses now use `protected => true` (like WP's draft/pending) so `show_in_admin_all_list` is honored
+
 ### 1.1.5
 - **Fix:** submissions that succeed showed "Submission failed" — frontend now recognizes the REST success response (`bookingId`); error responses now show their real server message
 - **Fix:** phone country dropdown options invisible on hover — `color-scheme` now follows the form's theme mode (light/dark) instead of the OS, and options use explicit card/text colors

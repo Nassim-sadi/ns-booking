@@ -93,10 +93,11 @@ $enable_message = isset($settings_tmp['enable_message']) ? (bool)$settings_tmp['
             </section>
         </div>
 
-        <div class="nsbc-success" data-role="success" style="display:none">
-            <div class="nsbc-success-icon">✓</div>
-            <h3><?php esc_html_e('Reservation Received!','ns-booking'); ?></h3>
-            <p><?php esc_html_e('Thank you! We have received your booking request and will confirm your session within 24 hours. Check your email for details.','ns-booking'); ?></p>
-        </div>
+    </div>
+
+    <div class="nsbc-success" data-role="success" style="display:none">
+        <div class="nsbc-success-icon">✓</div>
+        <h3><?php esc_html_e('Reservation Received!','ns-booking'); ?></h3>
+        <p><?php esc_html_e('Thank you! We have received your booking request and will confirm your session within 24 hours. Check your email for details.','ns-booking'); ?></p>
     </div>
 </div>

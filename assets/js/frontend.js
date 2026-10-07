@@ -255,7 +255,7 @@
       }
       // REST success: {bookingId,...} | AJAX success: {success:true,data:{...}}
       if (json && (json.success === true || typeof json.bookingId === 'number')){
-        if (els.success) els.success.style.display='';
+        if (els.success){ els.success.style.display=''; els.success.scrollIntoView({behavior:'smooth', block:'center'}); }
         const layout = root.querySelector('.nsbc-layout');
         if (layout) layout.style.display='none';
         if (els.formMsg) { els.formMsg.className='nsbc-form-msg is-success'; els.formMsg.textContent=''; }
