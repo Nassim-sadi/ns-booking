@@ -189,6 +189,10 @@ templates/emails/*.php
 
 ## Changelog
 
+### 1.1.1
+- **Feat:** every extra gets an image — seeded & new extras receive a title-matched Dashicon (Flying Dress → format-image, Classic Car → car, …); one-time backfill assigns icons to existing imageless extras; saving an extra with no image falls back to a default Dashicon
+- **Fix:** release zip no longer contains an empty `dist/` folder (CI built inside the checkout)
+
 ### 1.1.0
 - **Fix:** packages & extras never appeared on the frontend ("No packages available.") — `meta_query` nested `relation` incorrectly, producing an impossible AND condition; always returned 0 results
 - **Feat:** new setting **Card shadow** (`auto/none/subtle/medium/strong`) controlling `--nsbc-shadow` on all configurator cards

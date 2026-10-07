@@ -44,6 +44,19 @@ class NSBC_Activator {
         ];
     }
 
+    public static function default_icon_for($title) {
+        $map = [
+            'Flying Dress'     => 'dashicons-format-image',
+            'Special Dress'    => 'dashicons-heart',
+            'Traditional Dress'=> 'dashicons-art',
+            'Men Suit'         => 'dashicons-admin-users',
+            'Hair Styling'     => 'dashicons-editor-textcolor',
+            'Makeup & Hair'    => 'dashicons-camera',
+            'Classic Car'      => 'dashicons-car',
+        ];
+        return $map[trim((string)$title)] ?? 'dashicons-star-filled';
+    }
+
     private static function seed_extras() {
         $extras = [
             ['title'=>'Flying Dress','price'=>3000,'desc'=>'Flowing flying dress — Istanbul breeze.'],
@@ -64,6 +77,7 @@ class NSBC_Activator {
             if ($id && !is_wp_error($id)) {
                 update_post_meta($id,'_extra_price_cents',(int)$e['price']);
                 update_post_meta($id,'_extra_active',1);
+                update_post_meta($id,'_extra_icon_class', self::default_icon_for($e['title']));
             }
         }
     }

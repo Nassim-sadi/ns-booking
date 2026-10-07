@@ -3,7 +3,7 @@
  * Plugin Name:       NS Booking Configurator
  * Plugin URI:        https://nassimstudio.com
  * Description:       Standalone booking configurator — packages, session type Solo/Couple, extras, date + customer form = one booking record. No theme dependency. Server-side price recalculation.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Author:            Nassim Studio
  * Text Domain:       ns-booking
  * Domain Path:       /languages
@@ -13,7 +13,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('NSBC_VERSION', '1.1.0');
+define('NSBC_VERSION', '1.1.1');
 define('NSBC_PLUGIN_FILE', __FILE__);
 define('NSBC_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('NSBC_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -123,6 +123,18 @@ function nsbc_migrate_legacy_bookings() {
     update_option('nsbc_migrated_1_1', 1);
 }
 add_action('init', 'nsbc_migrate_legacy_bookings', 20);
+
+function nsbc_migrate_extra_icons() {
+    if (get_option('nsbc_migrated_icons_1_1')) return;
+    $extras = get_posts(['post_type'=>NSBC_CPT_EXTRA,'posts_per_page'=>-1,'post_status'=>'any']);
+    foreach ($extras as $ex) {
+        if (get_post_meta($ex->ID,'_extra_icon_id',true)) continue;
+        if (get_post_meta($ex->ID,'_extra_icon_class',true)) continue;
+        update_post_meta($ex->ID,'_extra_icon_class', NSBC_Activator::default_icon_for($ex->post_title));
+    }
+    update_option('nsbc_migrated_icons_1_1', 1);
+}
+add_action('init', 'nsbc_migrate_extra_icons', 20);
 
 function nsbc_deactivate() {
     require_once NSBC_PLUGIN_DIR . 'includes/class-nsbc-deactivator.php';

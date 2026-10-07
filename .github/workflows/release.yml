@@ -24,13 +24,13 @@ jobs:
 
       - name: Build plugin zip
         run: |
-          mkdir -p dist/ns-booking
-          rsync -r --exclude='.git' --exclude='.github' --exclude='*.zip' --exclude='.gitignore' ./ dist/ns-booking/
-          (cd dist && zip -rq "ns-booking-${{ steps.version.outputs.VERSION }}.zip" ns-booking)
+          mkdir -p "$RUNNER_TEMP/ns-booking"
+          rsync -r --exclude='.git' --exclude='.github' --exclude='*.zip' --exclude='.gitignore' ./ "$RUNNER_TEMP/ns-booking/"
+          (cd "$RUNNER_TEMP" && zip -rq "ns-booking-${{ steps.version.outputs.VERSION }}.zip" ns-booking)
 
       - name: Verify archive root
         run: |
-          unzip -l "dist/ns-booking-${{ steps.version.outputs.VERSION }}.zip" | grep "ns-booking.php"
+          unzip -l "$RUNNER_TEMP/ns-booking-${{ steps.version.outputs.VERSION }}.zip" | grep "ns-booking.php"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -38,4 +38,4 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: v${{ steps.version.outputs.VERSION }}
           generate_release_notes: true
-          files: dist/ns-booking-*.zip
+          files: ${{ runner.temp }}/ns-booking-*.zip

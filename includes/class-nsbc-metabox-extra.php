@@ -72,6 +72,7 @@ class NSBC_Metabox_Extra {
         $icon_id = isset($_POST['nsbc_icon_id']) ? (int)$_POST['nsbc_icon_id'] : 0;
         update_post_meta($post_id,'_extra_icon_id', $icon_id);
         $cls = isset($_POST['nsbc_icon_class']) ? sanitize_text_field($_POST['nsbc_icon_class']) : '';
+        if (!$icon_id && $cls === '') $cls = NSBC_Activator::default_icon_for($post->post_title);
         update_post_meta($post_id,'_extra_icon_class', $cls);
     }
 }
