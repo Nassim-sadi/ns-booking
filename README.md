@@ -51,7 +51,7 @@ cmd /c mklink /J "C:\Users\nassim\Local Sites\gem6\app\public\wp-content\plugins
 > Junction is already set for `gem6`. Edits in `E:\Projects\PackageForm` are live after hard refresh (`Ctrl+F5`). If you need a true symlink, re-run as Administrator: `New-Item -ItemType SymbolicLink -Path "...\plugins\ns-booking" -Target "E:\Projects\PackageForm"`
 
 ### B. Zip upload
-1. `Compress-Archive -Path "E:\Projects\PackageForm\*" -DestinationPath ns-booking.zip -Force` (or `git archive`)
+1. Download the ready-to-install plugin zip from **GitHub → Releases** (`ns-booking-X.Y.Z.zip`) — built automatically by the `release.yml` workflow on every `v*` tag; no need to zip the source yourself
 2. WP Admin → Plugins → Add New → Upload → Activate
 3. On activation, seeds 4 packages (1 Location / 2 Locations / All Locations / Ortaköy) + 7 extras (Flying Dress, Special Dress, Traditional Dress, Men Suit, Hair Styling, Makeup & Hair, Classic Car)
 
@@ -147,6 +147,8 @@ php -l includes/class-nsbc-*.php templates/*.php ns-booking.php
 git status
 git log --oneline -5
 ```
+
+**Release process:** tag the commit → GitHub Actions builds `ns-booking-<ver>.zip` (excludes `.git`, `.github`, zips) and attaches it to a GitHub Release. No local zipping needed.
 
 **File map:**
 ```
