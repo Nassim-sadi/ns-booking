@@ -21,8 +21,8 @@ class NSBC_Shortcode {
         $blackout = array_filter(array_map('trim', explode(',', (string)($settings['blackout_dates'] ?? ''))));
 
         // Include packages/extras where active meta is '1' OR missing (legacy = active)
-        $packages = get_posts(['post_type'=>NSBC_CPT_PACKAGE,'posts_per_page'=>-1,'post_status'=>'publish','orderby'=>'title','order'=>'ASC','meta_query'=>[['relation'=>'OR'],['key'=>'_package_active','value'=>'1'],['key'=>'_package_active','compare'=>'NOT EXISTS']]]);
-        $extrasAll = get_posts(['post_type'=>NSBC_CPT_EXTRA,'posts_per_page'=>-1,'post_status'=>'publish','orderby'=>'title','order'=>'ASC','meta_query'=>[['relation'=>'OR'],['key'=>'_extra_active','value'=>'1'],['key'=>'_extra_active','compare'=>'NOT EXISTS']]]);
+        $packages = get_posts(['post_type'=>NSBC_CPT_PACKAGE,'posts_per_page'=>-1,'post_status'=>'publish','orderby'=>'title','order'=>'ASC','meta_query'=>['relation'=>'OR',['key'=>'_package_active','value'=>'1'],['key'=>'_package_active','compare'=>'NOT EXISTS']]]);
+        $extrasAll = get_posts(['post_type'=>NSBC_CPT_EXTRA,'posts_per_page'=>-1,'post_status'=>'publish','orderby'=>'title','order'=>'ASC','meta_query'=>['relation'=>'OR',['key'=>'_extra_active','value'=>'1'],['key'=>'_extra_active','compare'=>'NOT EXISTS']]]);
 
         // flag map — emoji best, no extra lib, tourist friendly
         $flagMap = [
@@ -92,6 +92,17 @@ class NSBC_Shortcode {
                 '.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;}@media(prefers-color-scheme:dark){.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;}} .nsbc-configurator{background:var(--nsbc-bg)}',
                 esc_attr($bg_light), esc_attr($card_light), esc_attr($bg_dark), esc_attr($card_dark)
             );
+        }
+        // card shadow preset — hardcoded map, never echo raw input
+        $shadowMap = [
+            'none'   => 'none',
+            'subtle' => '0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04)',
+            'medium' => '0 4px 12px rgba(0,0,0,.10), 0 12px 32px rgba(0,0,0,.08)',
+            'strong' => '0 8px 24px rgba(0,0,0,.16), 0 24px 64px rgba(0,0,0,.14)',
+        ];
+        $shadowPreset = $settings['card_shadow'] ?? 'auto';
+        if (isset($shadowMap[$shadowPreset])) {
+            $inlineCss .= '.nsbc-configurator{--nsbc-shadow:' . $shadowMap[$shadowPreset] . '}';
         }
         wp_register_style('nsbc-frontend', NSBC_PLUGIN_URL.'assets/css/frontend.css', [], NSBC_VERSION);
         wp_enqueue_style('nsbc-frontend');

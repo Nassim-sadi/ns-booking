@@ -40,6 +40,7 @@ class NSBC_Activator {
             'card_light'          => '#ffffff',
             'card_dark'           => '#17171a',
             'theme_mode'          => 'auto',
+            'card_shadow'         => 'auto',
         ];
     }
 

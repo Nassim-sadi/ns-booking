@@ -35,7 +35,7 @@ Inspired by **reelsinistanbul.com/#booking** — rebuilt as a fully standalone, 
 - **Submission:** `POST /wp-json/nsbc/v1/bookings` with `X-WP-Nonce`; fallback `admin-ajax.php?action=nsbc_submit`; nonce + sanitization + honeypot + rate limit `10/min`
 - **Storage:** Each booking saves `_booking_package_id`, `_booking_session_type` (`solo|couple`), `_booking_extras` (array IDs), `_booking_extras_labels`, `_booking_date` (`Y-m-d`), `_booking_total_cents` + `_booking_total_formatted`, `_booking_currency`, `_booking_customer_name/email`, `_booking_phone_country/number/full`, `_booking_customer_message`, `_booking_status` (`pending`), `_booking_snapshot` (JSON audit) + `post_title = Booking #123 — Name — 2026-09-15`
 - **Admin:** Columns (Package/Session/Date/Total/Customer/Status), filters (package/session/status), sortable date/total, metabox with Recalculate + Resend emails, status `pending/confirmed/cancelled/completed`
-- **Settings:** Currency (`EUR/USD/GBP/MAD/TRY/AED/SAR` — default `€`), admin emails (comma list), lead days, blackout dates, phone default + countries, email subjects (tags `{{id}} {{package}} {{session}} {{date}} {{total}}`)
+- **Settings:** Currency (`EUR/USD/GBP/MAD/TRY/AED/SAR` — default `€`), admin emails (comma list), lead days, blackout dates, phone default + countries, email subjects (tags `{{id}} {{package}} {{session}} {{date}} {{total}}`), theme mode (`auto/light/dark`), background & card colors, card shadow (`auto/none/subtle/medium/strong`)
 - **Styling:** CSS vars + `prefers-color-scheme: dark`, transparent cards (inherits site background), `color-scheme: light dark`, large price `~30px`, no jQuery
 
 ---
@@ -178,6 +178,21 @@ templates/emails/*.php
 **Flags not showing?** Set **Settings → Phone countries** to `+90,+33,+49,+1` — shortcode maps them to `🇹🇷 🇫🇷 🇩🇪 🇺🇸`. If a code lacks a mapping, it falls back to `🌐`.
 
 **How to add package images?** Edit package → **Featured Image** → Set. No code needed; shortcode serves `medium_large` + frontend renders `16:10` cover.
+
+**Packages show "No packages available"?** They must be **Published** and their **Active (visible in configurator)** box ticked (package edit screen). If you upgraded from ≤1.0.0, update to 1.1.0+ — 1.0.0 had a broken `meta_query` that always returned an empty list.
+
+**How to change the card shadow?** Bookings → Settings → **Card shadow** — `Auto` keeps the built-in light/dark shadows, or pick `None / Subtle / Medium / Strong`. Applies to package cards, step cards and the summary panel.
+
+---
+
+## Changelog
+
+### 1.1.0
+- **Fix:** packages & extras never appeared on the frontend ("No packages available.") — `meta_query` nested `relation` incorrectly, producing an impossible AND condition; always returned 0 results
+- **Feat:** new setting **Card shadow** (`auto/none/subtle/medium/strong`) controlling `--nsbc-shadow` on all configurator cards
+
+### 1.0.0
+- Initial release
 
 ---
 

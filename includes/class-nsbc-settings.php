@@ -99,6 +99,16 @@ class NSBC_Settings {
                         })();
                         </script>
                     </td></tr>
+                    <tr><th><?php esc_html_e('Card shadow','ns-booking'); ?></th><td>
+                        <select name="nsbc_settings[card_shadow]">
+                            <option value="auto" <?php selected($opt['card_shadow']??'auto','auto'); ?>><?php esc_html_e('Auto — theme default','ns-booking'); ?></option>
+                            <option value="none" <?php selected($opt['card_shadow']??'auto','none'); ?>><?php esc_html_e('None','ns-booking'); ?></option>
+                            <option value="subtle" <?php selected($opt['card_shadow']??'auto','subtle'); ?>><?php esc_html_e('Subtle','ns-booking'); ?></option>
+                            <option value="medium" <?php selected($opt['card_shadow']??'auto','medium'); ?>><?php esc_html_e('Medium','ns-booking'); ?></option>
+                            <option value="strong" <?php selected($opt['card_shadow']??'auto','strong'); ?>><?php esc_html_e('Strong','ns-booking'); ?></option>
+                        </select>
+                        <p class="description"><?php esc_html_e('Shadow on package cards, step cards and summary. Auto keeps the built-in light/dark shadows.','ns-booking'); ?></p>
+                    </td></tr>
                     <tr><th><?php esc_html_e('Admin email subject','ns-booking'); ?></th><td>
                         <input type="text" name="nsbc_settings[email_admin_subject]" value="<?php echo esc_attr($opt['email_admin_subject']??''); ?>" style="width:100%;max-width:700px">
                         <p class="description">Tags: {{id}} {{package}} {{session}} {{date}} {{total}} {{customer_name}}</p>

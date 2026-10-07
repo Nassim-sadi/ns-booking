@@ -61,6 +61,9 @@ class NSBC_Validation {
         $mode = isset($input['theme_mode']) ? strtolower(trim($input['theme_mode'])) : ($out['theme_mode'] ?? 'auto');
         if (!in_array($mode, ['auto','light','dark'], true)) $mode = 'auto';
         $out['theme_mode'] = $mode;
+        $shadow = isset($input['card_shadow']) ? strtolower(trim($input['card_shadow'])) : ($out['card_shadow'] ?? 'auto');
+        if (!in_array($shadow, ['auto','none','subtle','medium','strong'], true)) $shadow = 'auto';
+        $out['card_shadow'] = $shadow;
         $out['email_admin_subject'] = isset($input['email_admin_subject']) ? sanitize_text_field($input['email_admin_subject']) : ($out['email_admin_subject'] ?? '');
         $out['email_customer_subject'] = isset($input['email_customer_subject']) ? sanitize_text_field($input['email_customer_subject']) : ($out['email_customer_subject'] ?? '');
         $currencies = ['EUR','USD','GBP','MAD','TRY','AED','SAR'];
