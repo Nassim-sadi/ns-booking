@@ -83,14 +83,30 @@ class NSBC_Shortcode {
         $card_light = $settings['card_light'] ?? '#ffffff';
         $card_dark = $settings['card_dark'] ?? '#17171a';
         $theme_mode = $settings['theme_mode'] ?? 'auto';
+        // color settings — hex-guard so invalid values never reach CSS
+        $hex = fn($v, $d) => (is_string($v) && preg_match('/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $v)) ? $v : $d;
+        $text_light = $hex($settings['text_light'] ?? '', '#111827');
+        $text_dark = $hex($settings['text_dark'] ?? '', '#f4f4f5');
+        $muted_light = $hex($settings['muted_light'] ?? '', '#6b7280');
+        $muted_dark = $hex($settings['muted_dark'] ?? '', '#a1a1aa');
+        $accent_light = $hex($settings['accent_light'] ?? '', '#111827');
+        $accent_dark = $hex($settings['accent_dark'] ?? '', '#fafafa');
+        $btnHover_light = $hex($settings['btn_hover_light'] ?? '', '');
+        $btnHover_dark = $hex($settings['btn_hover_dark'] ?? '', '');
+        $varsFor = function($text, $muted, $accent, $btnHover) {
+            $css = sprintf('--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;', $text, $muted, $accent);
+            if ($btnHover !== '') $css .= '--nsbc-btn-hover:'.$btnHover.';';
+            return $css;
+        };
         if ($theme_mode === 'light') {
-            $inlineCss = sprintf('.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;background:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_light), esc_attr($card_light), '#e5e7eb', '#111827', '#6b7280', '#111827');
+            $inlineCss = sprintf('.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;%sbackground:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_light), esc_attr($card_light), '#e5e7eb', $varsFor($text_light, $muted_light, $accent_light, $btnHover_light));
         } elseif ($theme_mode === 'dark') {
-            $inlineCss = sprintf('.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;--nsbc-text:%s;--nsbc-muted:%s;--nsbc-accent:%s;background:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_dark), esc_attr($card_dark), '#27272a', '#f4f4f5', '#a1a1aa', '#fafafa');
+            $inlineCss = sprintf('.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;--nsbc-border:%s;%sbackground:var(--nsbc-bg);color:var(--nsbc-text)}', esc_attr($bg_dark), esc_attr($card_dark), '#27272a', $varsFor($text_dark, $muted_dark, $accent_dark, $btnHover_dark));
         } else {
             $inlineCss = sprintf(
-                '.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;}@media(prefers-color-scheme:dark){.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;}} .nsbc-configurator{background:var(--nsbc-bg)}',
-                esc_attr($bg_light), esc_attr($card_light), esc_attr($bg_dark), esc_attr($card_dark)
+                '.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;%s}@media(prefers-color-scheme:dark){.nsbc-configurator{--nsbc-bg:%s;--nsbc-card:%s;%s}} .nsbc-configurator{background:var(--nsbc-bg)}',
+                esc_attr($bg_light), esc_attr($card_light), $varsFor($text_light, $muted_light, $accent_light, $btnHover_light),
+                esc_attr($bg_dark), esc_attr($card_dark), $varsFor($text_dark, $muted_dark, $accent_dark, $btnHover_dark)
             );
         }
         // card shadow preset — hardcoded map, never echo raw input

@@ -41,6 +41,14 @@ class NSBC_Activator {
             'card_dark'           => '#17171a',
             'theme_mode'          => 'auto',
             'card_shadow'         => 'auto',
+            'accent_light'        => '#111827',
+            'accent_dark'         => '#fafafa',
+            'btn_hover_light'     => '',
+            'btn_hover_dark'      => '',
+            'text_light'          => '#111827',
+            'text_dark'           => '#f4f4f5',
+            'muted_light'         => '#6b7280',
+            'muted_dark'          => '#a1a1aa',
         ];
     }
 

@@ -3,7 +3,7 @@
  * Plugin Name:       NS Booking Configurator
  * Plugin URI:        https://nassimstudio.com
  * Description:       Standalone booking configurator — packages, session type Solo/Couple, extras, date + customer form = one booking record. No theme dependency. Server-side price recalculation.
- * Version:           1.1.3
+ * Version:           1.1.4
  * Author:            Nassim Studio
  * Text Domain:       ns-booking
  * Domain Path:       /languages
@@ -13,7 +13,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('NSBC_VERSION', '1.1.3');
+define('NSBC_VERSION', '1.1.4');
 define('NSBC_PLUGIN_FILE', __FILE__);
 define('NSBC_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('NSBC_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -53,6 +53,14 @@ function nsbc_default_settings() {
         'card_dark'=>'#17171a',
         'theme_mode'=>'auto',
         'card_shadow'=>'auto',
+        'accent_light'=>'#111827',
+        'accent_dark'=>'#fafafa',
+        'btn_hover_light'=>'',
+        'btn_hover_dark'=>'',
+        'text_light'=>'#111827',
+        'text_dark'=>'#f4f4f5',
+        'muted_light'=>'#6b7280',
+        'muted_dark'=>'#a1a1aa',
     ];
 }
 

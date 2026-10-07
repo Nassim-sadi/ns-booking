@@ -189,6 +189,11 @@ templates/emails/*.php
 
 ## Changelog
 
+### 1.1.4
+- **Feat:** color settings with Light/Dark pairs: **Main color** (buttons, active states, focus), **Primary button hover**, **Text color**, **Muted color** — defaults match the previous hardcoded values, nothing changes until you edit
+- Button hover now uses a real background color (`--nsbc-btn-hover`, auto-derived from main color when empty) instead of an opacity fade
+- All color values are hex-validated server-side before reaching CSS
+
 ### 1.1.3
 - **Fix:** uniform card spacing — removed `.nsbc-card` margin that double-counted with layout gaps (50px vs 28px between sections); cards now use a single flex gap so top/bottom/internal spacing is identical
 - **Fix:** package cards align — excerpt slot always reserved, price pinned to card bottom, so all cards in a row match height and title/price positions

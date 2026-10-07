@@ -64,6 +64,20 @@ class NSBC_Validation {
         $shadow = isset($input['card_shadow']) ? strtolower(trim($input['card_shadow'])) : ($out['card_shadow'] ?? 'auto');
         if (!in_array($shadow, ['auto','none','subtle','medium','strong'], true)) $shadow = 'auto';
         $out['card_shadow'] = $shadow;
+        // color settings — light/dark pairs; empty btn_hover = auto (CSS color-mix fallback)
+        $hexFields = [
+            'accent_light'=>'#111827','accent_dark'=>'#fafafa',
+            'text_light'=>'#111827','text_dark'=>'#f4f4f5',
+            'muted_light'=>'#6b7280','muted_dark'=>'#a1a1aa',
+            'btn_hover_light'=>'','btn_hover_dark'=>'',
+        ];
+        foreach ($hexFields as $key=>$default) {
+            $v = $input[$key] ?? $input[$key.'_text'] ?? null;
+            if (!is_string($v)) $v = null;
+            $clean = $v !== null ? (sanitize_hex_color($v) ?: ($v === '' ? '' : $default)) : ($out[$key] ?? $default);
+            if (!is_string($clean) || ($clean !== '' && !sanitize_hex_color($clean))) $clean = $default;
+            $out[$key] = $clean;
+        }
         $out['email_admin_subject'] = isset($input['email_admin_subject']) ? sanitize_text_field($input['email_admin_subject']) : ($out['email_admin_subject'] ?? '');
         $out['email_customer_subject'] = isset($input['email_customer_subject']) ? sanitize_text_field($input['email_customer_subject']) : ($out['email_customer_subject'] ?? '');
         $currencies = ['EUR','USD','GBP','MAD','TRY','AED','SAR'];

@@ -88,16 +88,6 @@ class NSBC_Settings {
                             <input type="text" name="nsbc_settings[card_dark_text]" value="<?php echo esc_attr($opt['card_dark']??'#17171a'); ?>" style="width:90px" placeholder="#17171a" oninput="this.previousElementSibling.value=this.value">
                         </label>
                         <br><small class="description"><?php esc_html_e('Background for package cards, summary and form. Set to match or contrast your site.','ns-booking'); ?></small>
-                        <script>
-                        (function(){
-                          const pairs=[['bg_light','bg_light_text'],['bg_dark','bg_dark_text'],['card_light','card_light_text'],['card_dark','card_dark_text']];
-                          pairs.forEach(p=>{
-                            const c=document.querySelector('input[name="nsbc_settings['+p[0]+']"]');
-                            const t=document.querySelector('input[name="nsbc_settings['+p[1]+']"]');
-                            if(c&&t){ c.addEventListener('input',()=> t.value=c.value); t.addEventListener('change',()=>{ if(/^#[0-9a-fA-F]{6}$/.test(t.value)) c.value=t.value; }); }
-                          });
-                        })();
-                        </script>
                     </td></tr>
                     <tr><th><?php esc_html_e('Card shadow','ns-booking'); ?></th><td>
                         <select name="nsbc_settings[card_shadow]">
@@ -109,6 +99,35 @@ class NSBC_Settings {
                         </select>
                         <p class="description"><?php esc_html_e('Shadow on package cards, step cards and summary. Auto keeps the built-in light/dark shadows.','ns-booking'); ?></p>
                     </td></tr>
+                    <?php
+                    $nsbcColorRows = [
+                        ['accent_light','Main color','#111827','accent_dark','#fafafa','#fafafa',false,
+                         'Primary button background, active pill/card borders, focus rings and price highlight.'],
+                        ['btn_hover_light','Primary button hover','','btn_hover_dark','','',true,
+                         'Button background on hover. Empty = auto-derive from the main color.'],
+                        ['text_light','Text color','#111827','text_dark','#f4f4f5','#f4f4f5',false,
+                         'Main text: titles, labels, inputs, summary body.'],
+                        ['muted_light','Muted color','#6b7280','muted_dark','#a1a1aa','#a1a1aa',false,
+                         'Secondary text: hints, excerpts, prices, placeholders.'],
+                    ];
+                    foreach ($nsbcColorRows as $r) {
+                        $lk=$r[0];$ll=$r[1];$ld=$r[2];$dk=$r[3];$dl=$r[4];$dd=$r[5];$auto=$r[6];$desc=$r[7];
+                        $lv = (string)($opt[$lk] ?? ''); $dv = (string)($opt[$dk] ?? '');
+                        $lHas = $lv !== '' || !$auto; $dHas = $dv !== '' || !$auto;
+                        $lTxt = $auto ? $lv : ($lv ?: $ld); $dTxt = $auto ? $dv : ($dv ?: $dl);
+                    ?>
+                    <tr><th><?php echo esc_html($ll); ?></th><td>
+                        <label style="display:inline-flex;align-items:center;gap:8px;margin-right:16px">
+                            Light <input type="color" name="nsbc_settings[<?php echo esc_attr($lk); ?>]" value="<?php echo esc_attr($lHas ? ($lv ?: $ld) : '#888888'); ?>" <?php disabled(!$lHas); ?>>
+                            <input type="text" name="nsbc_settings[<?php echo esc_attr($lk); ?>_text]" value="<?php echo esc_attr($lTxt); ?>" style="width:90px" placeholder="<?php echo esc_attr($ld !== '' ? $ld : 'auto'); ?>" data-nsbc-color-sync>
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:8px;margin-right:16px">
+                            Dark <input type="color" name="nsbc_settings[<?php echo esc_attr($dk); ?>]" value="<?php echo esc_attr($dHas ? ($dv ?: $dl) : '#888888'); ?>" <?php disabled(!$dHas); ?>>
+                            <input type="text" name="nsbc_settings[<?php echo esc_attr($dk); ?>_text]" value="<?php echo esc_attr($dTxt); ?>" style="width:90px" placeholder="<?php echo esc_attr($dl !== '' ? $dl : 'auto'); ?>" data-nsbc-color-sync>
+                        </label>
+                        <br><small class="description"><?php echo esc_html($desc); ?></small>
+                    </td></tr>
+                    <?php } ?>
                     <tr><th><?php esc_html_e('Admin email subject','ns-booking'); ?></th><td>
                         <input type="text" name="nsbc_settings[email_admin_subject]" value="<?php echo esc_attr($opt['email_admin_subject']??''); ?>" style="width:100%;max-width:700px">
                         <p class="description">Tags: {{id}} {{package}} {{session}} {{date}} {{total}} {{customer_name}}</p>
@@ -117,6 +136,28 @@ class NSBC_Settings {
                         <input type="text" name="nsbc_settings[email_customer_subject]" value="<?php echo esc_attr($opt['email_customer_subject']??''); ?>" style="width:100%;max-width:700px">
                     </td></tr>
                 </table>
+                <script>
+                (function(){
+                  const pairs=[['bg_light','bg_light_text'],['bg_dark','bg_dark_text'],['card_light','card_light_text'],['card_dark','card_dark_text'],
+                               ['accent_light','accent_light_text'],['accent_dark','accent_dark_text'],
+                               ['text_light','text_light_text'],['text_dark','text_dark_text'],
+                               ['muted_light','muted_light_text'],['muted_dark','muted_dark_text'],
+                               ['btn_hover_light','btn_hover_light_text'],['btn_hover_dark','btn_hover_dark_text']];
+                  pairs.forEach(p=>{
+                    const c=document.querySelector('input[name="nsbc_settings['+p[0]+']"]');
+                    const t=document.querySelector('input[name="nsbc_settings['+p[1]+']"]');
+                    if(!c||!t) return;
+                    const optional=p[0].indexOf('btn_hover_')===0;
+                    const valid=v=>/^#[0-9a-fA-F]{6}$/.test(v)||/^#[0-9a-fA-F]{3}$/.test(v);
+                    c.addEventListener('input',()=>{ t.value=c.value; if(optional) c.disabled=false; });
+                    t.addEventListener('input',()=>{
+                      if(valid(t.value)){ c.value=t.value; if(optional) c.disabled=false; }
+                      else if(optional && t.value==='') c.disabled=true;
+                    });
+                    if(optional && t.value==='') c.disabled=true;
+                  });
+                })();
+                </script>
                 <?php submit_button(); ?>
             </form>
             <hr>

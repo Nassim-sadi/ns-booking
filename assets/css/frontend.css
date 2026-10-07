@@ -1,6 +1,6 @@
 /* NS Booking — standalone, theme-agnostic. Dark-mode aware, image-ready */
 :root{
-  --nsbc-bg:#ffffff;--nsbc-card:#ffffff;--nsbc-border:#e5e7eb;--nsbc-text:#111827;--nsbc-muted:#6b7280;--nsbc-accent:#111827;--nsbc-radius:16px;--nsbc-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --nsbc-bg:#ffffff;--nsbc-card:#ffffff;--nsbc-border:#e5e7eb;--nsbc-text:#111827;--nsbc-muted:#6b7280;--nsbc-accent:#111827;--nsbc-btn-hover:color-mix(in srgb, var(--nsbc-accent) 92%, transparent);--nsbc-radius:16px;--nsbc-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
   color-scheme: light dark;
 }
 @media(prefers-color-scheme:dark){
@@ -95,7 +95,7 @@
 .nsbc-btn{appearance:none;border:none;border-radius:999px;padding:13px 22px;font-size:14.5px;font-weight:800;cursor:pointer;transition:opacity .15s,transform .05s,box-shadow .15s}
 .nsbc-btn:active{transform:scale(.985)}
 .nsbc-btn-primary{background:var(--nsbc-accent);color:var(--nsbc-bg);box-shadow:0 4px 14px rgba(0,0,0,.12)}
-.nsbc-btn-primary:hover{opacity:.92}
+.nsbc-btn-primary:hover{background:var(--nsbc-btn-hover)}
 .nsbc-btn-primary:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
 .nsbc-form-msg{font-size:13px;color:#ef4444}
 .nsbc-form-msg.is-success{color:#10b981}
