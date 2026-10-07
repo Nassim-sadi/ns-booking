@@ -237,7 +237,8 @@
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.invalidEmail; return; }
     if (!phone || phone.replace(/\D/g,'').length < 6) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.invalidPhone; return; }
 
-    const payload = { package_id: state.packageId, session_type: state.session, extras: Array.from(state.extras), date, name, email, phone_country: phoneCountry, phone, message: els.message ? els.message.value : '', website: honeypot, total: 1 };
+    const payload = { package_id: state.packageId, session_type: state.session, extras: Array.from(state.extras), date, name, email, phone_country: phoneCountry, phone, message: els.message ? els.message.value : '', website: honeypot, total: 1,
+      client_ref: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(36).slice(2) };
     if (els.submit) { els.submit.disabled=true; els.submit.textContent='…'; }
     try{
       let res, json;
@@ -252,13 +253,14 @@
         res = await fetch(NSBC.ajaxUrl, {method:'POST', body: form});
         json = await res.json();
       }
-      if (json && (json.success || json.data)){
+      // REST success: {bookingId,...} | AJAX success: {success:true,data:{...}}
+      if (json && (json.success === true || typeof json.bookingId === 'number')){
         if (els.success) els.success.style.display='';
         const layout = root.querySelector('.nsbc-layout');
         if (layout) layout.style.display='none';
         if (els.formMsg) { els.formMsg.className='nsbc-form-msg is-success'; els.formMsg.textContent=''; }
       } else {
-        const msg = (json && (json.data && (json.data.message || json.data.errors || json.data))) || NSBC.i18n.submitError;
+        const msg = (json && ((json.data && (json.data.message || json.data.errors)) || json.message)) || NSBC.i18n.submitError;
         const text = typeof msg === 'string' ? msg : (Array.isArray(msg) ? msg.join(' ') : JSON.stringify(msg));
         if (els.formMsg) els.formMsg.textContent = text;
       }

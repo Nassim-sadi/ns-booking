@@ -29,6 +29,7 @@
 .nsbc-field{margin-bottom:0}
 .nsbc-input{width:100%;padding:14px 16px;border:1px solid var(--nsbc-border);border-radius:12px;font-size:17px;background:var(--nsbc-card);color:var(--nsbc-text);outline:none;transition:border-color .15s,box-shadow .15s}
 .nsbc-input::placeholder{color:var(--nsbc-muted)}
+.nsbc-configurator select option{background-color:var(--nsbc-card);color:var(--nsbc-text)}
 .nsbc-input:focus{border-color:var(--nsbc-accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--nsbc-accent) 14%, transparent)}
 .nsbc-textarea{resize:vertical;min-height:88px}
 .nsbc-hint{font-size:12px;color:var(--nsbc-muted)}
@@ -53,6 +54,8 @@
 .nsbc-pills{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .nsbc-pill{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px 16px;border:1px solid var(--nsbc-border);border-radius:14px;cursor:pointer;background:var(--nsbc-card);font-size:17px;font-weight:800;color:var(--nsbc-text);transition:background .14s,color .14s,border-color .14s}
 .nsbc-pill.is-active{border-color:var(--nsbc-accent);background:var(--nsbc-accent);color:var(--nsbc-bg)}
+.nsbc-pill:hover:not(.is-active){border-color:var(--nsbc-accent);background:color-mix(in srgb, var(--nsbc-accent) 7%, var(--nsbc-card))}
+.nsbc-pill.is-active:hover{background:var(--nsbc-btn-hover);border-color:var(--nsbc-btn-hover)}
 .nsbc-pill input{position:absolute;opacity:0;pointer-events:none}
 /* extras with images */
 .nsbc-extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}

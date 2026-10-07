@@ -100,6 +100,16 @@ class NSBC_Ajax {
             return new WP_Error('nsbc_validation', implode(' ', $validation['errors']), ['status'=>400,'errors'=>$validation['errors']]);
         }
         $d = $validation['data'];
+        // idempotency — same client_ref means the same submission (REST/AJAX retry)
+        $client_ref = preg_replace('/[^A-Za-z0-9\-]/', '', (string)($raw['client_ref'] ?? ''));
+        if (strlen($client_ref) > 64) $client_ref = substr($client_ref, 0, 64);
+        if ($client_ref !== '') {
+            $dupes = get_posts(['post_type'=>NSBC_CPT_BOOKING,'posts_per_page'=>1,'post_status'=>'any','fields'=>'ids','meta_key'=>'_booking_client_ref','meta_value'=>$client_ref]);
+            if (!empty($dupes)) {
+                $existing_id = (int)$dupes[0];
+                return ['bookingId'=>$existing_id,'total'=>get_post_meta($existing_id,'_booking_total_formatted',true),'totalCents'=>(int)get_post_meta($existing_id,'_booking_total_cents',true),'message'=>__('Booking received.','ns-booking'),'duplicate'=>true];
+            }
+        }
         $settings=get_option('nsbc_settings', function_exists('nsbc_default_settings') ? nsbc_default_settings() : []);
         $currency = $settings['currency'] ?? 'EUR';
         // Server-side price
@@ -137,6 +147,7 @@ class NSBC_Ajax {
         update_post_meta($booking_id,'_booking_phone_full',$d['phone_full']);
         update_post_meta($booking_id,'_booking_customer_message',$d['message']);
         update_post_meta($booking_id,'_booking_status','pending');
+        if ($client_ref !== '') update_post_meta($booking_id,'_booking_client_ref',$client_ref);
 
         $snapshot = [
             'package_id'=>$d['package_id'],'package_label'=>$packageLabel,

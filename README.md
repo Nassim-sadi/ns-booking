@@ -189,6 +189,13 @@ templates/emails/*.php
 
 ## Changelog
 
+### 1.1.5
+- **Fix:** submissions that succeed showed "Submission failed" — frontend now recognizes the REST success response (`bookingId`); error responses now show their real server message
+- **Fix:** phone country dropdown options invisible on hover — `color-scheme` now follows the form's theme mode (light/dark) instead of the OS, and options use explicit card/text colors
+- **Fix:** Solo/Couple pills had no hover state — inactive pills now tint with the main color, active pill uses the configured primary-button hover color
+- **Feat:** duplicate-booking guard — a per-submit `client_ref` idempotency key makes REST/AJAX retries return the existing booking instead of inserting twice
+- **Feat:** flag map extended to full ITU E.164 coverage (~200 dial codes) — any code added under Settings → Phone countries gets a real flag
+
 ### 1.1.4
 - **Feat:** color settings with Light/Dark pairs: **Main color** (buttons, active states, focus), **Primary button hover**, **Text color**, **Muted color** — defaults match the previous hardcoded values, nothing changes until you edit
 - Button hover now uses a real background color (`--nsbc-btn-hover`, auto-derived from main color when empty) instead of an opacity fade
