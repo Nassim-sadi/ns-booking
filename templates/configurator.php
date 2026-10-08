@@ -5,6 +5,7 @@ if (!defined('ABSPATH')) exit;
 /** @var string $symbol */
 $settings_tmp = get_option('nsbc_settings', function_exists('nsbc_default_settings') ? nsbc_default_settings() : []);
 $enable_message = isset($settings_tmp['enable_message']) ? (bool)$settings_tmp['enable_message'] : true;
+$enable_email = isset($settings_tmp['enable_email']) ? (bool)$settings_tmp['enable_email'] : true;
 ?>
 <div class="nsbc-configurator" data-nsbc>
     <div class="nsbc-layout">
@@ -42,10 +43,12 @@ $enable_message = isset($settings_tmp['enable_message']) ? (bool)$settings_tmp['
                         <label class="nsbc-label" for="nsbc-name"><?php esc_html_e('Full Name','ns-booking'); ?> <span class="nsbc-req">*</span></label>
                         <input type="text" id="nsbc-name" data-role="name" class="nsbc-input" placeholder="<?php esc_attr_e('John Doe','ns-booking'); ?>" autocomplete="name" required>
                     </div>
+                    <?php if ($enable_email): ?>
                     <div class="nsbc-field">
                         <label class="nsbc-label" for="nsbc-email"><?php esc_html_e('Email','ns-booking'); ?> <span class="nsbc-req">*</span></label>
                         <input type="email" id="nsbc-email" data-role="email" class="nsbc-input" placeholder="you@example.com" autocomplete="email" required>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="nsbc-grid2">

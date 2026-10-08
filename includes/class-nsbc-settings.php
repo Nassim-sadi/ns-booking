@@ -55,6 +55,14 @@ class NSBC_Settings {
                         <label><input type="checkbox" name="nsbc_settings[enable_message]" value="1" <?php checked($opt['enable_message']??1,1); ?>> <?php esc_html_e('Show message field in form','ns-booking'); ?></label>
                         <p class="description"><?php esc_html_e('When disabled, the field is hidden and not required.','ns-booking'); ?></p>
                     </td></tr>
+                    <tr><th><?php esc_html_e('Email field','ns-booking'); ?></th><td>
+                        <label><input type="checkbox" name="nsbc_settings[enable_email]" value="1" <?php checked($opt['enable_email']??1,1); ?>> <?php esc_html_e('Request customer email in the form','ns-booking'); ?></label>
+                        <p class="description"><?php esc_html_e('When disabled, the email field is hidden and customer email notifications are skipped (contact customers by phone).','ns-booking'); ?></p>
+                    </td></tr>
+                    <tr><th><?php esc_html_e('Proxy IP headers','ns-booking'); ?></th><td>
+                        <label><input type="checkbox" name="nsbc_settings[trust_proxy_ip]" value="1" <?php checked($opt['trust_proxy_ip']??1,1); ?>> <?php esc_html_e('Trust forwarding headers (behind Cloudflare / hosting proxy)','ns-booking'); ?></label>
+                        <p class="description"><?php esc_html_e('When enabled, the real visitor IP is read through a fronting proxy. Headers are only honored when the direct connection comes from a private/proxy address.','ns-booking'); ?></p>
+                    </td></tr>
                     <tr><th><?php esc_html_e('Package & extra images','ns-booking'); ?></th><td>
                         <label><input type="checkbox" name="nsbc_settings[show_images]" value="1" <?php checked($opt['show_images']??1,1); ?>> <?php esc_html_e('Show images (package featured image & extra icons)','ns-booking'); ?></label>
                         <p class="description"><?php esc_html_e('When disabled, cards show title + excerpt + price only, no images.','ns-booking'); ?></p>

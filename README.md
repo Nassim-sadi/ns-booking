@@ -189,6 +189,15 @@ templates/emails/*.php
 
 ## Changelog
 
+### 1.1.7
+- **Feat:** new "Email field" setting — hide the email input in the form (and skip customer email notifications) when you'd rather contact customers by phone
+- **Feat:** bulk actions on the Bookings list — mark selected bookings Pending / Confirmed / Cancelled / Completed in one click (status + title stay in sync)
+- **Fix:** admin list now shows the **Booking Date** column instead of a redundant "created" date — see the session date at a glance
+- **Fix:** success message scroll — the form collapses first, then scrolls the confirmation into view
+- **Fix:** email failures are no longer silent — send results are stored per booking and the booking screen warns when notifications failed; the resend button now reports per-recipient results
+- **Fix:** visitor IP detection no longer trusts `X-Forwarded-For` blindly — header spoofing can't bypass rate limits; forwarding headers are only honored behind a real proxy (configurable under Settings → Proxy IP headers)
+- **Fix:** plugin uninstall now genuinely deletes all bookings/packages/extras, settings, and transient caches (including customer PII snapshots) on single and multisite installs
+
 ### 1.1.6
 - **Fix:** success message never appeared after a booking — it sat inside the form layout that gets hidden on submit; moved out so it stays visible (now also scrolled into view)
 - **Fix:** bookings hidden from the admin "All" list — custom statuses now use `protected => true` (like WP's draft/pending) so `show_in_admin_all_list` is honored

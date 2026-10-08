@@ -234,7 +234,7 @@
     if (!state.packageId) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.selectPackage; return; }
     if (!date) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.required; return; }
     if (name.length < 2) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.required; return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.invalidEmail; return; }
+    if (els.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.invalidEmail; return; }
     if (!phone || phone.replace(/\D/g,'').length < 6) { if(els.formMsg) els.formMsg.textContent = NSBC.i18n.invalidPhone; return; }
 
     const payload = { package_id: state.packageId, session_type: state.session, extras: Array.from(state.extras), date, name, email, phone_country: phoneCountry, phone, message: els.message ? els.message.value : '', website: honeypot, total: 1,
@@ -255,9 +255,9 @@
       }
       // REST success: {bookingId,...} | AJAX success: {success:true,data:{...}}
       if (json && (json.success === true || typeof json.bookingId === 'number')){
-        if (els.success){ els.success.style.display=''; els.success.scrollIntoView({behavior:'smooth', block:'center'}); }
         const layout = root.querySelector('.nsbc-layout');
         if (layout) layout.style.display='none';
+        if (els.success){ els.success.style.display=''; requestAnimationFrame(()=> els.success.scrollIntoView({behavior:'smooth', block:'center'})); }
         if (els.formMsg) { els.formMsg.className='nsbc-form-msg is-success'; els.formMsg.textContent=''; }
       } else {
         const msg = (json && ((json.data && (json.data.message || json.data.errors)) || json.message)) || NSBC.i18n.submitError;

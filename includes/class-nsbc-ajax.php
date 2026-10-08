@@ -32,6 +32,7 @@ class NSBC_Ajax {
 
     public function handle_ajax() {
         $nonce = $_POST['nonce'] ?? $_POST['_wpnonce'] ?? $_SERVER['HTTP_X_WP_NONCE'] ?? '';
+        if (!is_string($nonce)) $nonce = '';
         if (!wp_verify_nonce($nonce,'nsbc_submit') && !wp_verify_nonce($nonce,'wp_rest')) {
             wp_send_json_error(['message'=>__('Security check failed.','ns-booking')], 403);
         }
@@ -63,13 +64,19 @@ class NSBC_Ajax {
             set_transient($k, (int)get_transient($k)+1, 300);
         }
         if (!empty($_POST['resend'])) {
-            $pid=(int)($_POST['post_id']??0);
-            if ($pid) {
-                NSBC_Emails::send_admin($pid);
-                NSBC_Emails::send_customer($pid);
-                wp_send_json_success('Emails resent');
-            }
-            wp_send_json_error('No booking');
+            $pid = isset($_POST['post_id']) ? (int)$_POST['post_id'] : 0;
+            if (!$pid || get_post_type($pid) !== NSBC_CPT_BOOKING) wp_send_json_error('No booking', 404);
+            $a = NSBC_Emails::send_admin($pid);
+            NSBC_Emails::record($pid, 'admin', $a);
+            $email = get_post_meta($pid, '_booking_customer_email', true);
+            $c = is_email($email) ? NSBC_Emails::send_customer($pid) : null;
+            if ($c !== null) NSBC_Emails::record($pid, 'customer', $c);
+            $parts = [];
+            $parts[] = $a ? __('admin email sent','ns-booking') : __('admin email FAILED','ns-booking');
+            if ($c === null) $parts[] = __('no customer email to send','ns-booking');
+            elseif ($c) $parts[] = __('customer email sent','ns-booking');
+            else $parts[] = __('customer email FAILED','ns-booking');
+            wp_send_json_success(implode(' — ', $parts));
         }
         $pkg=(int)($_POST['package_id']??0);
         $sess=sanitize_key($_POST['session_type']??'solo');
@@ -162,9 +169,12 @@ class NSBC_Ajax {
         // Final title
         wp_update_post(['ID'=>$booking_id,'post_title'=> sprintf('Booking #%d — %s — %s', $booking_id, $d['name'], $d['date'])]);
 
-        // Emails (non-blocking failure)
-        NSBC_Emails::send_admin($booking_id);
-        NSBC_Emails::send_customer($booking_id);
+        // Emails — record results; customer mail only when an email was provided
+        $mailAdmin = NSBC_Emails::send_admin($booking_id);
+        NSBC_Emails::record($booking_id, 'admin', $mailAdmin);
+        if ($d['email'] !== '') {
+            NSBC_Emails::record($booking_id, 'customer', NSBC_Emails::send_customer($booking_id));
+        }
 
         return ['bookingId'=>$booking_id,'total'=>$formatted,'totalCents'=>$cents,'message'=>__('Booking received.','ns-booking')];
     }

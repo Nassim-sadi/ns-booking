@@ -20,12 +20,39 @@ class NSBC_Admin {
         $new['title']= __('Booking','ns-booking');
         $new['nsbc_package']= __('Package','ns-booking');
         $new['nsbc_session']= __('Session','ns-booking');
-        $new['nsbc_date']= __('Date','ns-booking');
+        $new['nsbc_date']= __('Booking Date','ns-booking');
         $new['nsbc_total']= __('Total','ns-booking');
         $new['nsbc_customer']= __('Customer','ns-booking');
         $new['nsbc_status']= __('Status','ns-booking');
-        $new['date']= $cols['date'] ?? __('Created','ns-booking');
         return $new;
+    }
+    public function bulk_actions($actions) {
+        $actions['nsbc-set-pending']= __('Set Pending','ns-booking');
+        $actions['nsbc-set-confirmed']= __('Set Confirmed','ns-booking');
+        $actions['nsbc-set-cancelled']= __('Set Cancelled','ns-booking');
+        $actions['nsbc-set-completed']= __('Set Completed','ns-booking');
+        return $actions;
+    }
+    public function handle_bulk($redirect, $doaction, $ids) {
+        if (!in_array($doaction, ['nsbc-set-pending','nsbc-set-confirmed','nsbc-set-cancelled','nsbc-set-completed'], true)) return $redirect;
+        if (!current_user_can('edit_posts')) return $redirect;
+        $status = str_replace('nsbc-set-', '', $doaction);
+        $count = 0;
+        foreach ((array)$ids as $id) {
+            if (get_post_type($id) === NSBC_CPT_BOOKING) {
+                NSBC_Metabox_Booking::apply_status((int)$id, $status);
+                $count++;
+            }
+        }
+        if (!$count) return $redirect;
+        return add_query_arg(['nsbc_bulk_status'=>$status, 'nsbc_bulk_count'=>$count], $redirect);
+    }
+    public function bulk_notice() {
+        if (!isset($_GET['nsbc_bulk_count'], $_GET['nsbc_bulk_status'])) return;
+        $count = (int)$_GET['nsbc_bulk_count'];
+        $status = sanitize_key($_GET['nsbc_bulk_status']);
+        if (!$count || !in_array($status, ['pending','confirmed','cancelled','completed'], true)) return;
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html(sprintf(_n('%d booking set to %s.', '%d bookings set to %s.', $count, 'ns-booking'), $count, $status)) . '</p></div>';
     }
     public function sortable_columns($cols) {
         $cols['nsbc_date']='nsbc_date';

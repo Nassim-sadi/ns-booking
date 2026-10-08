@@ -2,6 +2,18 @@
 if (!defined('ABSPATH')) exit;
 
 class NSBC_Emails {
+    public static function record(int $booking_id, string $kind, bool $ok) {
+        $key = $kind === 'admin' ? '_booking_email_admin' : '_booking_email_customer';
+        update_post_meta($booking_id, $key, $ok ? '1' : '0');
+    }
+
+    public static function failures(int $booking_id): array {
+        $out = [];
+        if ((string)get_post_meta($booking_id, '_booking_email_admin', true) === '0') $out[] = __('admin notifications','ns-booking');
+        if ((string)get_post_meta($booking_id, '_booking_email_customer', true) === '0') $out[] = __('customer confirmation','ns-booking');
+        return $out;
+    }
+
     private static function replace_tags($text, $booking_id) {
         $package_id = (int)get_post_meta($booking_id,'_booking_package_id',true);
         $package = $package_id ? get_the_title($package_id) : '';

@@ -35,6 +35,8 @@ class NSBC_Activator {
             'email_customer_subject' => 'Your booking request received — {{package}}',
             'enable_message'      => 1,
             'show_images'         => 1,
+            'enable_email'        => 1,
+            'trust_proxy_ip'      => 1,
             'bg_light'            => '#ffffff',
             'bg_dark'             => '#0b0b0c',
             'card_light'          => '#ffffff',

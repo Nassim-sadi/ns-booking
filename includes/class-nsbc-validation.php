@@ -3,16 +3,28 @@ if (!defined('ABSPATH')) exit;
 
 class NSBC_Validation {
     public static function get_client_ip(): string {
-        // Respect reverse proxies — Cloudflare, nginx, etc.
-        $keys = ['HTTP_CF_CONNECTING_IP','HTTP_X_FORWARDED_FOR','HTTP_X_REAL_IP','REMOTE_ADDR'];
-        foreach ($keys as $k) {
-            if (empty($_SERVER[$k])) continue;
-            $val = trim((string)$_SERVER[$k]);
-            // X-Forwarded-For may be comma list — take first
-            if (strpos($val, ',') !== false) $val = trim(explode(',', $val)[0]);
-            if (filter_var($val, FILTER_VALIDATE_IP)) return $val;
+        $settings = get_option('nsbc_settings', []);
+        $remote = isset($_SERVER['REMOTE_ADDR']) ? trim((string)$_SERVER['REMOTE_ADDR']) : '';
+        // Only trust forwarding headers when the direct peer is a proxy (private/reserved range)
+        if (!empty($settings['trust_proxy_ip']) && $remote !== '' && self::is_private_ip($remote)) {
+            // X-Forwarded-For: take the rightmost public IP (proxy appends its hops)
+            if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                foreach (array_reverse(array_map('trim', explode(',', (string)$_SERVER['HTTP_X_FORWARDED_FOR']))) as $ip) {
+                    if (filter_var($ip, FILTER_VALIDATE_IP) && !self::is_private_ip($ip)) return $ip;
+                }
+            }
+            foreach (['HTTP_CF_CONNECTING_IP','HTTP_X_REAL_IP'] as $k) {
+                if (empty($_SERVER[$k])) continue;
+                $ip = trim((string)$_SERVER[$k]);
+                if (filter_var($ip, FILTER_VALIDATE_IP) && !self::is_private_ip($ip)) return $ip;
+            }
         }
-        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        return ($remote !== '' && filter_var($remote, FILTER_VALIDATE_IP)) ? $remote : 'unknown';
+    }
+
+    private static function is_private_ip(string $ip): bool {
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) return false;
+        return false === filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
     }
 
     private static function is_inactive($val): bool {
@@ -49,6 +61,8 @@ class NSBC_Validation {
         }
         $out['enable_message'] = isset($input['enable_message']) ? (int)(bool)$input['enable_message'] : (int)($out['enable_message'] ?? 1);
         $out['show_images'] = isset($input['show_images']) ? (int)(bool)$input['show_images'] : (int)($out['show_images'] ?? 1);
+        $out['enable_email'] = isset($input['enable_email']) ? (int)(bool)$input['enable_email'] : (int)($out['enable_email'] ?? 1);
+        $out['trust_proxy_ip'] = isset($input['trust_proxy_ip']) ? (int)(bool)$input['trust_proxy_ip'] : (int)($out['trust_proxy_ip'] ?? 1);
         // support both color picker and text helper (bg_light_text)
         $bgL = $input['bg_light'] ?? $input['bg_light_text'] ?? null;
         $bgD = $input['bg_dark'] ?? $input['bg_dark_text'] ?? null;
@@ -92,6 +106,7 @@ class NSBC_Validation {
         $errors = [];
         $settings = get_option('nsbc_settings', function_exists('nsbc_default_settings') ? nsbc_default_settings() : []);
         $minLead = (int)($settings['min_lead_days'] ?? 1);
+        $enableEmail = (int)($settings['enable_email'] ?? 1);
 
         $package_id = isset($raw['package_id']) ? (int)$raw['package_id'] : 0;
         $session = isset($raw['session_type']) ? sanitize_key($raw['session_type']) : 'solo';
@@ -143,7 +158,7 @@ class NSBC_Validation {
         }
 
         if (mb_strlen($name) < 2) $errors[] = __('Name is required.','ns-booking');
-        if (!is_email($email)) $errors[] = __('Valid email is required.','ns-booking');
+        if ($enableEmail && !is_email($email)) $errors[] = __('Valid email is required.','ns-booking');
         // Phone: country + number
         $phone_country = preg_replace('/\s+/', '', $phone_country);
         if (!preg_match('/^\+\d{1,4}$/', $phone_country)) $errors[] = __('Invalid country code.','ns-booking');

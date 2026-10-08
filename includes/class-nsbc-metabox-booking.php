@@ -2,6 +2,25 @@
 if (!defined('ABSPATH')) exit;
 
 class NSBC_Metabox_Booking {
+    private static $saving = false;
+
+    public static function apply_status(int $post_id, string $status) {
+        $allowed = ['pending','confirmed','cancelled','completed'];
+        if (!in_array($status, $allowed, true)) $status = 'pending';
+        update_post_meta($post_id, '_booking_status', $status);
+        $post = get_post($post_id);
+        if (!$post) return $status;
+        $name = get_post_meta($post_id, '_booking_customer_name', true) ?: '—';
+        $date = get_post_meta($post_id, '_booking_date', true) ?: '—';
+        $title = sprintf('Booking #%d — %s — %s', $post_id, $name, $date);
+        $desired = 'nsbc-' . $status;
+        if ($post->post_title === $title && $post->post_status === $desired) return $status;
+        self::$saving = true;
+        wp_update_post(['ID'=>$post_id,'post_title'=>$title,'post_status'=>$desired]);
+        self::$saving = false;
+        return $status;
+    }
+
     public function register() {
         add_meta_box('nsbc_booking', __('Booking Details','ns-booking'), [$this,'render'], NSBC_CPT_BOOKING, 'normal', 'high');
         add_meta_box('nsbc_booking_status', __('Status','ns-booking'), [$this,'render_status'], NSBC_CPT_BOOKING, 'side', 'high');
@@ -20,9 +39,13 @@ class NSBC_Metabox_Booking {
         $msg = get_post_meta($post->ID,'_booking_customer_message',true);
         $currency = get_post_meta($post->ID,'_booking_currency',true) ?: (get_option('nsbc_settings')['currency'] ?? 'EUR');
         $snapshot = get_post_meta($post->ID,'_booking_snapshot',true);
+        $mailFailures = NSBC_Emails::failures($post->ID);
         $packages = get_posts(['post_type'=>NSBC_CPT_PACKAGE,'posts_per_page'=>-1,'post_status'=>'any','orderby'=>'title','order'=>'ASC']);
         $allExtras = get_posts(['post_type'=>NSBC_CPT_EXTRA,'posts_per_page'=>-1,'post_status'=>'any']);
         $byId = []; foreach($allExtras as $e) $byId[$e->ID]=$e;
+        if ($mailFailures) {
+            echo '<div class="notice notice-warning inline"><p>' . sprintf(esc_html__('Notification emails failed to send: %1$s. Check your SMTP setup / SMTP plugin.','ns-booking'), esc_html(implode(', ', $mailFailures))) . '</p></div>';
+        }
         ?>
         <table class="form-table">
             <tr><th>Package</th><td>
@@ -86,6 +109,7 @@ class NSBC_Metabox_Booking {
         echo '<p><button type="button" class="button" onclick="if(confirm(\'Resend emails?\')){jQuery.post(ajaxurl,{action:\'nsbc_recalc\',_ajax_nonce:\''.esc_js(wp_create_nonce('nsbc_recalc')).'\',post_id:'.$post->ID.',resend:1},function(r){alert(r.data||r);});}">Resend emails</button></p>';
     }
     public function save($post_id, $post) {
+        if (self::$saving) return;
         if (!isset($_POST['nsbc_booking_nonce']) || !wp_verify_nonce($_POST['nsbc_booking_nonce'],'nsbc_booking_save')) return;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
         if (!current_user_can('edit_post',$post_id)) return;
@@ -113,9 +137,7 @@ class NSBC_Metabox_Booking {
         update_post_meta($post_id,'_booking_phone_full',$phone);
         update_post_meta($post_id,'_booking_customer_message',$msg);
         // normalize + sync status to both meta and post_status (wp custom status)
-        $allowed_statuses = ['pending','confirmed','cancelled','completed'];
-        if (!in_array($status, $allowed_statuses, true)) $status = 'pending';
-        update_post_meta($post_id,'_booking_status',$status);
+        self::apply_status($post_id, $status);
         // recalc total server-side
         if ($pkg) {
             $cents = NSBC_Pricing::calculate($pkg,$session,$extras);
@@ -123,19 +145,6 @@ class NSBC_Metabox_Booking {
             $curr = get_post_meta($post_id,'_booking_currency',true) ?: ($settings['currency'] ?? 'EUR');
             update_post_meta($post_id,'_booking_total_cents',$cents);
             update_post_meta($post_id,'_booking_total_formatted',NSBC_Pricing::format($cents,$curr));
-        }
-        // sync post title + post_status (avoid infinite loop)
-        $title = sprintf('Booking #%d — %s — %s', $post_id, $name ?: '—', $date ?: '—');
-        $desired_status = 'nsbc-' . $status;
-        $needs_update = false;
-        $update = ['ID'=>$post_id];
-        if ($post->post_title !== $title) { $update['post_title']=$title; $needs_update=true; }
-        if ($post->post_status !== $desired_status) { $update['post_status']=$desired_status; $needs_update=true; }
-        if ($needs_update) {
-            // prevent recursion: temporarily remove our own save hook
-            remove_action('save_post_' . NSBC_CPT_BOOKING, [$this,'save'], 10);
-            wp_update_post($update);
-            add_action('save_post_' . NSBC_CPT_BOOKING, [$this,'save'], 10, 2);
         }
     }
 }
