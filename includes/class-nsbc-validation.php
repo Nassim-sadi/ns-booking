@@ -6,7 +6,7 @@ class NSBC_Validation {
         $settings = get_option('nsbc_settings', []);
         $remote = isset($_SERVER['REMOTE_ADDR']) ? trim((string)$_SERVER['REMOTE_ADDR']) : '';
         // Only trust forwarding headers when the direct peer is a proxy (private/reserved range)
-        if (!empty($settings['trust_proxy_ip']) && $remote !== '' && self::is_private_ip($remote)) {
+        if (!empty($settings['trust_proxy_ip'] ?? 1) && $remote !== '' && self::is_private_ip($remote)) {
             // X-Forwarded-For: take the rightmost public IP (proxy appends its hops)
             if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
                 foreach (array_reverse(array_map('trim', explode(',', (string)$_SERVER['HTTP_X_FORWARDED_FOR']))) as $ip) {

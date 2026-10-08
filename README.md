@@ -189,6 +189,10 @@ templates/emails/*.php
 
 ## Changelog
 
+### 1.1.8
+- **Fix:** Settings toggles (Email field, Proxy IP headers, plus the older Message field and images) could be turned on but never off — unchecked checkboxes weren't saved. Value is now sent explicitly, so they toggle both ways.
+- **Fix:** "Trust proxy IP headers" now defaults to ON when the option is missing — existing installs no longer fall back to the proxy's IP (shared rate-limit bucket) until an admin re-saves settings.
+
 ### 1.1.7
 - **Feat:** new "Email field" setting — hide the email input in the form (and skip customer email notifications) when you'd rather contact customers by phone
 - **Feat:** bulk actions on the Bookings list — mark selected bookings Pending / Confirmed / Cancelled / Completed in one click (status + title stay in sync)
